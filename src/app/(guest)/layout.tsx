@@ -1,4 +1,5 @@
 import GuestHead from "@/components/ui/organisms/GuestHead";
+import GuestFooter from "@/components/ui/organisms/GuestFooter";
 import { inter } from "../fonts";
 // import Image from "next/image";
 
@@ -23,6 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
       <GuestHead />
       {children}
+      <GuestFooter />
     </div>
   );
 }

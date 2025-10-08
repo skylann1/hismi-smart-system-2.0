@@ -12,7 +12,7 @@ import {
   FaPeopleCarry,
 } from "react-icons/fa";
 import { GrResources } from "react-icons/gr";
-import { GiTechnoHeart } from "react-icons/gi";
+import { GiTechnoHeart, GiOwl, GiWolfHowl, GiAnt, GiDolphin  } from "react-icons/gi";
 import { FaPeopleGroup } from "react-icons/fa6";
 import { HiAcademicCap } from "react-icons/hi";
 import { FiPlus } from "react-icons/fi";
@@ -26,7 +26,7 @@ export default function Page() {
   const [threeFaq, setThreeFaq] = useState(false);
   const [fourFaq, setFourFaq] = useState(false);
   const [fiveFaq, setFiveFaq] = useState(false);
-  console.log(firstFaq);
+  // console.log(firstFaq);
   return (
     <div className="w-full">
       <div className="w-full h-[85vh] flex justify-between items-center md:px-12 px-6 relative  bg-linear-to-t from-white to-transparent">
@@ -52,9 +52,9 @@ export default function Page() {
           </span>
         </div>
         <div className="md:w-1/2 h-full relative flex justify-center items-end ">
-          <div className="w-80 h-80 rounded-full flex justify-center items-center bg-gradient-to-b from-[#0c1250]/5 to-transparent absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10">
-            <div className="w-[85%] h-[85%] rounded-full flex justify-center items-center  bg-gradient-to-b from-[#0c1250]/15 to-transparent">
-              <div className="w-[85%] h-[85%] rounded-full flex justify-center items-end  bg-gradient-to-b from-[#0c1250]/35 to-transparent"></div>
+          <div className="w-80 h-80 rounded-full flex justify-center items-center bg-gradient-to-b from-[#0c1250]/15 to-transparent absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10">
+            <div className="w-[85%] h-[85%] rounded-full flex justify-center items-center  bg-gradient-to-b from-[#0c1250]/30 to-transparent">
+              <div className="w-[85%] h-[85%] rounded-full flex justify-center items-end  bg-gradient-to-b from-[#0c1250]/45 to-transparent"></div>
             </div>
           </div>
           <div className="flex flex-col justify-center items-center">
@@ -336,7 +336,7 @@ export default function Page() {
               </div>
               <div className="w-full flex justify-between items-center">
                 <span className="w-11 h-11 flex justify-center items-center bg-sky-200/30 rounded-lg">
-                  <SiSololearn className="text-xl text-yellow-500" />
+                  <GiOwl className="text-xl text-amber-800" />
                 </span>
                 <span className="group">
                   <PiArrowBendRightUpThin className="text-slate-300 text-4xl group-hover:text-slate-500 " />
@@ -368,7 +368,7 @@ export default function Page() {
               </div>
               <div className="w-full flex justify-between items-center">
                 <span className="w-11 h-11 flex justify-center items-center bg-sky-200/30 rounded-lg">
-                  <FaConnectdevelop className="text-2xl text-green-600" />
+                  <GiDolphin className="text-2xl text-sky-600" />
                 </span>
                 <span className="group">
                   <PiArrowBendRightUpThin className="text-slate-300 text-4xl group-hover:text-slate-500 " />
@@ -399,7 +399,7 @@ export default function Page() {
               </div>
               <div className="w-full flex justify-between items-center">
                 <span className="w-11 h-11 flex justify-center items-center bg-sky-200/30 rounded-lg">
-                  <GiTechnoHeart className="text-2xl text-red-600" />
+                  <GiAnt className="text-2xl text-black" />
                 </span>
                 <span className="group">
                   <PiArrowBendRightUpThin className="text-slate-300 text-4xl group-hover:text-slate-500 " />
@@ -432,7 +432,7 @@ export default function Page() {
               </div>
               <div className="w-full flex justify-between items-center">
                 <span className="w-11 h-11 flex justify-center items-center bg-sky-200/30 rounded-lg">
-                  <GrResources className="text-2xl text-blue-600" />
+                  <GiWolfHowl className="text-2xl text-gray-500" />
                 </span>
                 <span className="group">
                   <PiArrowBendRightUpThin className="text-slate-300 text-4xl group-hover:text-slate-500 " />
@@ -676,7 +676,6 @@ export default function Page() {
         </div>
       </div>
 
-      <GuestFooter/>
     </div>
   );
 }

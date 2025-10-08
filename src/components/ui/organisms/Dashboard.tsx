@@ -2,37 +2,70 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { RiDiscussFill } from "react-icons/ri";
 import { LuNotebookPen } from "react-icons/lu";
 import { GrMoney } from "react-icons/gr";
 import { IoIosPeople, IoIosAlbums } from "react-icons/io";
 import { FaBarsProgress } from "react-icons/fa6";
 import { MdConnectWithoutContact } from "react-icons/md";
 import { FaAddressBook, FaBusinessTime } from "react-icons/fa";
-import { IoScanCircle } from "react-icons/io5";
 import Image from "next/image";
 import { inter } from "@/app/fonts";
+import { FaAssistiveListeningSystems } from "react-icons/fa";
+import { signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { useAppDispatch } from "@/hooks/redux";
 
-export default function Dashboard({ children }: { children: React.ReactNode }) {
+type DashboardPropsType = {
+  children: React.ReactNode[] | React.ReactElement[];
+};
+
+export default function Dashboard({ children }: DashboardPropsType) {
+  const dispacth = useAppDispatch();
+  interface CustomUser extends Record<string, unknown> {
+    id?: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  }
+
+  const { data: session } = useSession();
+  const user = session?.user as CustomUser | undefined;
+
+  useEffect(() => {
+    const getDataUser = async () => {
+      try {
+        if (user) {
+          const res = await fetch(`/dashboard/api/anggota?id=${user.id}`);
+          const data = await res.json();
+
+          if (data.success) {
+            dispacth({
+              type: "user/setUser",
+              payload: data.data,
+            });
+          }
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
+    getDataUser();
+  }, [session]);
+
   const [isOpen, setIsOpen] = useState(false);
   const [sideBar, setSideBar] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const [acaraDrop, setAcaraDrop] = useState(false);
-  const [pertemuanDrop, setPertemuanDrop] = useState(false);
   const [notulenDrop, setNotulenDrop] = useState(false);
-  const [keuanganDrop, setKeuanganDrop] = useState(false);
+  const [pertemuanDrop, setPertemuanDrop] = useState(false);
   const [anggotaDrop, setAnggotaDrop] = useState(false);
   const [kehadiranDrop, setKehadiranDrop] = useState(false);
-  const [absenDrop, setAbsenDrop] = useState(false);
-  const [mendatangDrop, setMendatangDrop] = useState(false);
-
-  const toggleAcaraDrop = () => {
-    setAcaraDrop(!acaraDrop);
-  };
-  const togglePertemuanDrop = () => {
-    setPertemuanDrop(!pertemuanDrop);
-  };
+  const [publikasiDrop, setPublikasiDrop] = useState(false);
+  const [prokerDrop, setProkerDrop] = useState(false);
+  const [kegiatanDrop, setKegiatanDrop] = useState(false);
+  // state for date
+  const [currentDate, setCurrentDate] = useState<Date | null>(null);
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -65,6 +98,11 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
       document.body.classList.remove("overflow-hidden");
     };
   }, [sideBar]);
+
+  // update state for realtime date or time
+  useEffect(() => {
+    setCurrentDate(new Date());
+  }, []);
 
   const handleClickOutside = (e: React.MouseEvent<HTMLElement>) => {
     if ((e.target as HTMLElement).id === "overlay-sidebar") {
@@ -106,7 +144,11 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
                 </svg>
               </button>
               <div className="flex justify-center items-center">
-                <span className={`${inter.className} text-base font-semibold`}>Learn, lead, connect.</span>
+                <span
+                  className={`${inter.className} text-sm font-normal opacity-80 hidden md:block`}
+                >
+                  Himpunan Mahasiswa Sistem Informasi
+                </span>
               </div>
             </div>
 
@@ -145,21 +187,23 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
                       </Link>
                     </li>
                     <li>
-                      <a
+                      <Link
                         href="#"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         Dashboard
-                      </a>
+                      </Link>
                     </li>
 
                     <li>
-                      <a
-                        href="#"
+                      <button
+                        onClick={() =>
+                          signOut({ callbackUrl: "/member/login" })
+                        }
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         Sign out
-                      </a>
+                      </button>
                     </li>
                   </ul>
                 </div>
@@ -171,13 +215,13 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
 
       <aside
         id="overlay-sidebar"
-        className={`fixed top-0 left-0 z-40 w-full sm:w-64 h-screen pt-14 transition-transform bg-opacity-10 border-r bg-white sm:-translate-x-0 ${
+        className={`fixed top-0 left-0 z-40 w-full sm:w-64 h-screen pt-14 transition-transform bg-opacity-10 bg-white sm:-translate-x-0 shadow-right ${
           sideBar ? "-translate-x-0" : "-translate-x-full"
         }`}
         aria-label="Sidebar"
         onClick={(e) => handleClickOutside(e)}
       >
-        <div className="w-64 h-full px-3 pb-4 overflow-y-auto bg-white pt-6">
+        <div className="w-64 h-full px-3 pb-4 overflow-y-auto pt-6">
           <ul className="space-y-2 font-medium">
             <li>
               <Link
@@ -199,58 +243,13 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
             </li>
 
             <li>
-              <button
-                type="button"
-                onClick={() => {
-                  setMendatangDrop(!mendatangDrop);
-                }}
-                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 "
+              <Link
+                href="/dashboard/mendatang"
+                className="flex items-center p-2 text-gray-900 rounded-lg  hover:bg-gray-100  group"
               >
                 <FaBusinessTime className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
-                <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
-                  Mendatang
-                </span>
-
-                <svg
-                  className={`w-3 h-3 transition-transform ${
-                    mendatangDrop ? "rotate-180" : "rotate-0"
-                  }`}
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </button>
-              <ul
-                className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
-                  mendatangDrop ? "block" : "hidden"
-                }`}
-              >
-                <li>
-                  <Link
-                    href="/dashboard/acara/mendatang"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    Acara
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/dashboard/pertemuan/mendatang"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    Pertemuan
-                  </Link>
-                </li>
-              </ul>
+                <span className="ms-3 font-inter-medium">Mendatang</span>
+              </Link>
             </li>
 
             <li>
@@ -291,7 +290,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
               >
                 <li>
                   <Link
-                    href="/dashboard/list-anggota"
+                    href="/dashboard/anggota"
                     className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
                   >
                     List anggota
@@ -299,7 +298,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
                 </li>
                 <li>
                   <Link
-                    href="/dashboard/tambah-anggota"
+                    href="/dashboard/anggota/tambah"
                     className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
                   >
                     Tambah anggota
@@ -311,8 +310,10 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
             <li>
               <button
                 type="button"
-                onClick={toggleAcaraDrop}
-                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 "
+                onClick={() => {
+                  setPertemuanDrop(!pertemuanDrop);
+                }}
+                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 cursor-pointer"
               >
                 <svg
                   className="shrink-0 w-5 h-5 text-gray-500 transition duration-75"
@@ -323,61 +324,6 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
                 >
                   <path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z" />
                 </svg>
-
-                <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
-                  Acara
-                </span>
-
-                <svg
-                  className={`w-3 h-3 transition-transform ${
-                    acaraDrop ? "rotate-180" : "rotate-0"
-                  }`}
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </button>
-              <ul
-                className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
-                  acaraDrop ? "block" : "hidden"
-                }`}
-              >
-                <li>
-                  <Link
-                    href="#"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    List acara
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    Tambah acara
-                  </Link>
-                </li>
-              </ul>
-            </li>
-
-            <li>
-              <button
-                type="button"
-                onClick={togglePertemuanDrop}
-                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 "
-              >
-                <RiDiscussFill className=" shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
-
                 <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
                   Pertemuan
                 </span>
@@ -407,15 +353,15 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
               >
                 <li>
                   <Link
-                    href="#"
+                    href="/dashboard/pertemuan"
                     className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
                   >
-                    List pertemuan
+                    pertemuan
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="#"
+                    href="/dashboard/pertemuan/tambah"
                     className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
                   >
                     Tambah pertemuan
@@ -425,8 +371,79 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
             </li>
 
             <li>
+              <button
+                type="button"
+                onClick={() => {
+                  setPublikasiDrop(!publikasiDrop);
+                }}
+                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 cursor-pointer"
+              >
+                <FaAssistiveListeningSystems className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
+                <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
+                  Publikasi
+                </span>
+
+                <svg
+                  className={`w-3 h-3 transition-transform ${
+                    publikasiDrop ? "rotate-180" : "rotate-0"
+                  }`}
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 10 6"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="m1 1 4 4 4-4"
+                  />
+                </svg>
+              </button>
+              <ul
+                className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
+                  publikasiDrop ? "block" : "hidden"
+                }`}
+              >
+                <li>
+                  <Link
+                    href="/dashboard/publikasi/divisi"
+                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                  >
+                    Divisi
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/dashboard/publikasi/bph"
+                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                  >
+                    BPH
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/dashboard/publikasi/artikel"
+                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                  >
+                    artikel
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/dashboard/publikasi/galeri"
+                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                  >
+                    Galeri
+                  </Link>
+                </li>
+              </ul>
+            </li>
+
+            <li>
               <Link
-                href="#"
+                href="/dashboard/album-foto"
                 className="flex items-center p-2 text-gray-900 rounded-lg  hover:bg-gray-100  group"
               >
                 <IoIosAlbums className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
@@ -473,7 +490,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
               >
                 <li>
                   <Link
-                    href="#"
+                    href="/dashboard/notulensi"
                     className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
                   >
                     List notulensi
@@ -491,22 +508,32 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
             </li>
 
             <li>
-              <button
-                type="button"
-                onClick={() => {
-                  setKeuanganDrop(!keuanganDrop);
-                }}
-                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 "
+              <Link
+                href="/dashboard/keuangan"
+                className="flex items-center p-2 text-gray-900 rounded-lg  hover:bg-gray-100  group"
               >
                 <GrMoney className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
 
+                <span className="ms-3 font-inter-medium">Keuangan</span>
+              </Link>
+            </li>
+
+            <li>
+              <button
+                type="button"
+                onClick={() => {
+                  setProkerDrop(!prokerDrop);
+                }}
+                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 cursor-pointer"
+              >
+                <FaBarsProgress className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
                 <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
-                  keuangan
+                  Proker
                 </span>
 
                 <svg
                   className={`w-3 h-3 transition-transform ${
-                    keuanganDrop ? "rotate-180" : "rotate-0"
+                    prokerDrop ? "rotate-180" : "rotate-0"
                   }`}
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
@@ -524,54 +551,81 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
               </button>
               <ul
                 className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
-                  keuanganDrop ? "block" : "hidden"
+                  prokerDrop ? "block" : "hidden"
                 }`}
               >
                 <li>
                   <Link
-                    href="#"
+                    href="/dashboard/proker"
                     className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
                   >
-                    Data kas
+                    List proker
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="#"
+                    href="/dashboard/proker/tambah"
                     className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
                   >
-                    Data pemasukan
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    Data pengeluaran
+                    Tambah proker
                   </Link>
                 </li>
               </ul>
             </li>
 
             <li>
-              <Link
-                href="#"
-                className="flex items-center p-2 text-gray-900 rounded-lg  hover:bg-gray-100  group"
-              >
-                <FaBarsProgress className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
-                <span className="ms-3 font-inter-medium">Proker</span>
-              </Link>
-            </li>
-
-            <li>
-              <Link
-                href="#"
-                className="flex items-center p-2 text-gray-900 rounded-lg  hover:bg-gray-100  group"
+              <button
+                type="button"
+                onClick={() => {
+                  setKegiatanDrop(!kegiatanDrop);
+                }}
+                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 cursor-pointer"
               >
                 <MdConnectWithoutContact className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
-                <span className="ms-3 font-inter-medium">Kegiatan</span>
-              </Link>
+                <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
+                  Kegiatan
+                </span>
+
+                <svg
+                  className={`w-3 h-3 transition-transform ${
+                    kegiatanDrop ? "rotate-180" : "rotate-0"
+                  }`}
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 10 6"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="m1 1 4 4 4-4"
+                  />
+                </svg>
+              </button>
+              <ul
+                className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
+                  kegiatanDrop ? "block" : "hidden"
+                }`}
+              >
+                <li>
+                  <Link
+                    href="/dashboard/kegiatan"
+                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                  >
+                    List kegiatan
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/dashboard/kegiatan/tambah"
+                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                  >
+                    Tambah kegiatan
+                  </Link>
+                </li>
+              </ul>
             </li>
 
             <li>
@@ -580,7 +634,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
                 onClick={() => {
                   setKehadiranDrop(!kehadiranDrop);
                 }}
-                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 "
+                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 cursor-pointer"
               >
                 <FaAddressBook className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
 
@@ -589,9 +643,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
                 </span>
 
                 <svg
-                  className={`w-3 h-3 transition-transform ${
-                    keuanganDrop ? "rotate-180" : "rotate-0"
-                  }`}
+                  className={`w-3 h-3 transition-transform`}
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -613,24 +665,24 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
               >
                 <li>
                   <Link
-                    href="#"
+                    href="/dashboard/kehadiran"
                     className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
                   >
-                    Kehadiran acara
+                    Kehadiran anggota
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="#"
+                    href="/dashboard/kehadiran/absen"
                     className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
                   >
-                    Kehadiran pertemuan
+                    Absen
                   </Link>
                 </li>
               </ul>
             </li>
 
-            <li>
+            {/* <li>
               <button
                 type="button"
                 onClick={() => {
@@ -684,12 +736,29 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
                   </Link>
                 </li>
               </ul>
-            </li>
+            </li> */}
           </ul>
         </div>
       </aside>
 
-      <div className="p-4 sm:ml-64 pt-20 pb-10 bg-[#f2f2f2] min-h-screen">{children}</div>
+      <div className=" sm:ml-64 pt-[69px] pb-10 bg-[#f2f2f2] min-h-screen relative overflow-hidden">
+        <div className="w-full bg-white border-b-[1.2px] border-slate-200 text-black px-4 md:px-6 py-3 shadow-lg text-[13px] flex justify-between items-center z-50">
+          <span className="opacity-60 font-normal">
+            Himpunan Mahasiswa Sistem Informasi.
+          </span>
+          <span className="ms-2 opacity-60 font-normal text-xs hidden md:block">
+            {!currentDate
+              ? "Loading date..."
+              : currentDate.toLocaleDateString("id-ID", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+          </span>
+        </div>
+        <div className="p-4">{children}</div>
+      </div>
     </>
   );
 }

@@ -1,98 +1,129 @@
-import CustomCalendar from "@/components/ui/moleculs/calendar/Calendar";
-import Link from "next/link";
+"use client";
+
+import DashboardSection from "@/components/ui/templates/DashboardSection";
+import EventCard from "@/components/ui/organisms/EventCard";
+import { useState } from "react";
+import { EventCardComponent } from "@/components/ui/organisms/EventCard";
+
+const filters = ["Semua", "Acara", "Kegiatan", "Pertemuan"];
+const contents: EventCardComponent[] = [
+  {
+    month: "Oktober",
+    date: "15",
+    title: "Rapat Koordinasi",
+    description: "Rapat koordinasi untuk membahas agenda mendatang.",
+    time: "10:00 - 12:00",
+    location: "Ruang Rapat Utama",
+    organizer: "HIMSI",
+    methodEvent: "Offline",
+    type: "Pertemuan",
+  },
+  {
+    month: "Oktober",
+    date: "15",
+    title: "Rapat Koordinasi",
+    description: "Rapat koordinasi untuk membahas agenda mendatang Musyarah bewar dan oprec rendanca bulann afoijweofcjef jbqad.",
+    time: "10:00 - 12:00",
+    location: "Ruang Rapat Utama",
+    organizer: "HIMSI",
+    methodEvent: "Online",
+    type: "Kegiatan",
+  },
+  {
+    month: "Oktober",
+    date: "15",
+    title: "Rapat Koordinasi",
+    description: "Rapat koordinasi untuk membahas agenda mendatang Musyarah bewar dan oprec rendanca bulann afoijweofcjef jbqad.",
+    time: "10:00 - 12:00",
+    location: "Ruang Rapat Utama",
+    organizer: "HIMSI",
+    methodEvent: "Online",
+    type: "Acara",
+  },
+  {
+    month: "Oktober",
+    date: "15",
+    title: "Rapat Koordinasi",
+    description: "Rapat koordinasi untuk membahas agenda mendatang Musyarah bewar dan oprec rendanca bulann afoijweofcjef jbqad.",
+    time: "10:00 - 12:00",
+    location: "Ruang Rapat Utama",
+    organizer: "HIMSI",
+    methodEvent: "Online",
+    type: "Pertemuan",
+  },
+  {
+    month: "Oktober",
+    date: "15",
+    title: "Rapat Koordinasi",
+    description: "Rapat koordinasi untuk membahas agenda mendatang Musyarah bewar dan oprec rendanca bulann afoijweofcjef jbqad.",
+    time: "10:00 - 12:00",
+    location: "Ruang Rapat Utama",
+    organizer: "HIMSI",
+    methodEvent: "Online",
+    type: "Pertemuan",
+  },
+  {
+    month: "Oktober",
+    date: "15",
+    title: "Rapat Koordinasi",
+    description: "Rapat koordinasi untuk membahas agenda mendatang Musyarah bewar dan oprec rendanca bulann afoijweofcjef jbqad.",
+    time: "10:00 - 12:00",
+    location: "Ruang Rapat Utama",
+    organizer: "HIMSI",
+    methodEvent: "Online",
+    type: "Pertemuan",
+  },
+];
 
 export default function Page() {
+  const [selectedFilter, setSelectedFilter] = useState(filters[0]);
+  console.log("Selected Filter:", selectedFilter);
+
+  const FilteredContent = contents.filter((event) => {
+    if (selectedFilter === "Semua") return true;
+
+    return event.type === selectedFilter;
+  })
   return (
-    <div className="w-full flex flex-wrap-reverse gap-6 py-12 xl:justify-between justify-center items-center xl:items-end md:items-center">
-      <div className="xl:w-fit w-full">
-        <div className=" flex-col xl:flex hidden">
-          <h1 className="text-4xl font-bold font-sans opacity-90 ">
-            Acara & Rapat Mendatang
-          </h1>
-          <span className="text-base font-normal opacity-70 font-sans">
-            Jangan sampai ketinggalan jadwal acara dan rapat
-          </span>
-        </div>
-        <div className="flex flex-col items-start mt-4 w-full">
-          <div className="w-full mt-3 bg-white rounded-lg shadow p-3 flex flex-col justify-between">
-            <div className="w-full flex justify-between">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
-                <span className="text-xs font-semibold">2025-04-13</span>
-              </div>
-              <Link
-                href="/"
-                className="text-xs font-semibold text-blue-600 hover:underline underline-offset-1 "
-              >
-                More
-              </Link>
-            </div>
-            <div className="mt-2">
-              <span className="text-base font-semibold">
-                Community Gathering
-              </span>
-              <p className="text-xs font-semibold opacity-70 mt-1">
-                Lorem ipsum dolor sit amet consectetur.
-              </p>
-            </div>
-          </div>
-          <div className="w-full mt-3 bg-white rounded-lg shadow p-3 flex flex-col justify-between">
-            <div className="w-full flex justify-between">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
-                <span className="text-xs font-semibold">2025-04-13</span>
-              </div>
-              <Link
-                href="/"
-                className="text-xs font-semibold text-blue-600 hover:underline underline-offset-1 "
-              >
-                More
-              </Link>
-            </div>
-            <div className="mt-2">
-              <span className="text-base font-semibold">
-                Community Gathering
-              </span>
-              <p className="text-xs font-semibold opacity-70 mt-1">
-                Lorem ipsum dolor sit amet consectetur.
-              </p>
-            </div>
-          </div>
-          <div className="w-full mt-3 bg-white rounded-lg shadow p-3 flex flex-col justify-between">
-            <div className="w-full flex justify-between">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
-                <span className="text-xs font-semibold">2025-04-13</span>
-              </div>
-              <Link
-                href="/"
-                className="text-xs font-semibold text-blue-600 hover:underline underline-offset-1 "
-              >
-                More
-              </Link>
-            </div>
-            <div className="mt-2">
-              <span className="text-base font-semibold">
-                Community Gathering
-              </span>
-              <p className="text-xs font-semibold opacity-70 mt-1">
-                Lorem ipsum dolor sit amet consectetur.
-              </p>
-            </div>
-          </div>
+    <DashboardSection className="flex flex-col gap-10 bg-white w-full min-h-screen p-4">
+      <div className="flex flex-col gap-4">
+        <h1 className="text-2xl font-bold text-gray-800">Jadwal Mendatang</h1>
+        <span className="text-sm font-normal text-gray-500 max-w-3xl">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ullam exercitationem, ipsum voluptatum sapiente corporis voluptate quod dolor minus, corrupti ducimus nobis, quisquam iste eos. Repudiandae commodi tenetur similique nostrum iste.</span>
+        <div className="inline-flex items-center space-x-1 rounded-lg p-1 bg-gray-100 w-fit">
+          {filters.map((filter) => (
+            <button
+              key={filter}
+              onClick={() => setSelectedFilter(filter)}
+              className={`px-2 py-1 md:px-4 md:py-1.5 text-sm md:text-sm font-semibold rounded-md transition-all duration-200 bg-gray-100 cursor-pointer text-gray-600
+            ${
+              selectedFilter === filter
+                ? "bg-gray-700 text-white shadow-sm"
+                : ""
+            }
+          `}
+            >
+              {filter}
+            </button>
+          ))}
         </div>
       </div>
-      <div className="lg:w-[30rem]">
-        <div className=" flex-col xl:hidden flex mb-10">
-          <h1 className="text-4xl font-bold font-sans opacity-90 ">
-            Acara & Rapat Mendatang
-          </h1>
-          <span className="text-base font-normal opacity-70 font-sans">
-            Jangan sampai ketinggalan jadwal acara dan rapat
-          </span>
-        </div>
-        <CustomCalendar />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {Object.values(FilteredContent).map((event, i) =>
+          i % 2 === 0 ? (
+            <EventCard
+              key={i}
+              className="bg-indigo-800/80 text-white"
+              content={event}
+            />
+          ) : (
+            <EventCard
+              key={i}
+              className="bg-gray-100 text-gray-800"
+              content={event}
+            />
+          )
+        )}
       </div>
-    </div>
+    </DashboardSection>
   );
 }

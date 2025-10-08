@@ -1,3 +1,5 @@
+"use client";
+
 import {
   IoChatbubblesSharp,
   IoCalendarNumberSharp,
@@ -9,17 +11,22 @@ import { IoIosPeople } from "react-icons/io";
 import { FaCartArrowDown, FaCartPlus } from "react-icons/fa";
 import { inter } from "@/app/fonts";
 import Image from "next/image";
+import { useAppSelector } from "@/hooks/redux";
 
 const MainDashboard = () => {
+  const { user } = useAppSelector((state) => state);
+
   return (
     <div>
       <div className={`w-full flex flex-col min-h-screen ${inter.className}`}>
         <div className="w-full flex flex-col md:flex-row rounded-xl bg-gradient-to-b from-violet-500 to-violet-900  px-4 md:px-8 pt-8 gap-16">
           <div className="w-full flex flex-col justify-start items-start text-white md:mb-6">
             <h1 className="text-3xl drop-shadow-xl uppercase font-bold">
-              SELAMAT DATANG, sahlan
+              SELAMAT DATANG, <span>{user?.nama}</span>
             </h1>
-            <span className=" text-sm opacity-90 font-semibold">HIMSI SMART SYSTEM</span>
+            <span className=" text-sm opacity-90 font-semibold">
+              HIMSI SMART SYSTEM
+            </span>
             <p className="text-sm mt-6 opacity-90">
               Dashboard HIMSI UBSI KLA smart system dapat membantu setiap
               anggota untuk melakukan prosses absensi pertemuan atau acara,
@@ -33,8 +40,8 @@ const MainDashboard = () => {
             <div className="w-[80%] md:w-[60%]">
               <Image
                 src="/assets/static-img/people.svg"
-                height={1000}
-                width={1000}
+                height={5000}
+                width={5000}
                 alt="svdf"
                 className="w-full object-center object-cover"
               />
@@ -87,11 +94,15 @@ const MainDashboard = () => {
                   </div>
                   <div className="flex flex-col justify-start gap-1">
                     <span className="text-sm font-medium">Santunan yatim</span>
-                    <p className="text-xs font-medium opacity-90">10 mar 2025</p>
+                    <p className="text-xs font-medium opacity-90">
+                      10 mar 2025
+                    </p>
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs font-semibold opacity-80">Rp 500,000</span>
+                  <span className="text-xs font-semibold opacity-80">
+                    Rp 500,000
+                  </span>
                 </div>
               </div>
               <div className="w-full hover:bg-gray-100 transition-all ease-in-out duration-300 rounded-md flex justify-between items-start p-2">
@@ -101,11 +112,15 @@ const MainDashboard = () => {
                   </div>
                   <div className="flex flex-col justify-start gap-1">
                     <span className="text-sm font-medium">Santunan yatim</span>
-                    <p className="text-xs font-medium opacity-90">20 feb 2025</p>
+                    <p className="text-xs font-medium opacity-90">
+                      20 feb 2025
+                    </p>
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs font-semibold opacity-80">Rp 250,000</span>
+                  <span className="text-xs font-semibold opacity-80">
+                    Rp 250,000
+                  </span>
                 </div>
               </div>
             </div>
@@ -113,7 +128,9 @@ const MainDashboard = () => {
           <div className="w-full md:w-[60%] rounded-lg h-fit md:h-[26rem] bg-primary border border-gray-300 flex flex-col overflow-hidden justify-center items-center px-4 py-10 text-white gap-8 md:gap-16">
             <div className="flex flex-col justify-center items-center">
               <span className="text-4xl font-semibold">8</span>
-              <span className="text-xs opacity-80 font-medium">BULAN TAGIHAN KAS</span>
+              <span className="text-xs opacity-80 font-medium">
+                BULAN TAGIHAN KAS
+              </span>
             </div>
             <div className="flex flex-col justify-center items-center">
               <span className="text-3xl font-semibold">Rp. 80,000</span>

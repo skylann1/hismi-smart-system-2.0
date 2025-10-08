@@ -1,4 +1,4 @@
-import { Inter, Oswald, Headland_One } from "next/font/google";
+import { Inter, Oswald, Headland_One, Bungee } from "next/font/google";
 
 export const inter = Inter({
     subsets: ["latin"],
@@ -15,5 +15,11 @@ export const oswald = Oswald({
 export const headlandOne = Headland_One({
     subsets: ["latin"],
     weight: ["400"],
+    display: "swap",
+})
+
+export const bungee = Bungee({
+    subsets: ["latin"],
+    weight: ["400",],
     display: "swap",
 })
