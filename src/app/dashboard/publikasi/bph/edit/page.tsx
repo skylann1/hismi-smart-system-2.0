@@ -30,15 +30,6 @@ interface StatusForm {
   };
 }
 
-const mockExistingBphData: BphSettingsFormData = {
-  images: {
-    image1: "/assets/static-img/bph-1.jpg",
-    image2: "/assets/static-img/bph-2.jpg",
-    image3: null,
-    image4: null,
-  },
-};
-
 // === KOMPONEN UTAMA (INDUK) ===
 export default function Page() {
   const [isLoading, setIsLoading] = useState(true);
@@ -63,8 +54,11 @@ export default function Page() {
     const fetchBphData = async () => {
       setIsLoading(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setFormData(mockExistingBphData);
+        const req = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/publikasi/bph`
+        );
+        const res = await req.json();
+        setFormData({ images: res.data.images });
       } catch (error) {
         console.error("Gagal mengambil data BPH:", error);
       } finally {
@@ -85,8 +79,11 @@ export default function Page() {
     };
 
     // --- Images ---
-    (Object.keys(formData.images) as (keyof typeof formData.images)[]).forEach(
-      (key) => {
+
+    if (formData.images) {
+      (
+        Object.keys(formData.images) as (keyof typeof formData.images)[]
+      ).forEach((key) => {
         const file = formData.images[key];
 
         // --- Required ---
@@ -127,8 +124,8 @@ export default function Page() {
         }
 
         errors.images[key] = { status: false, message: "" };
-      }
-    );
+      });
+    }
 
     setFormStatus(errors);
   }, [formData]);
@@ -153,9 +150,17 @@ export default function Page() {
         submissionData.append(`${key}_url`, value);
       }
     }
-    // Lakukan sesuatu dengan submissionData, misalnya kirim ke API
-    console.log("Submitting BPH data:", formData);
-    // Tambahkan logika pengiriman data ke backend di sini
+    // console.log("Submitting BPH data:", formData);
+    try{
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/publikasi/bph/edit`, {
+        method: "PATCH",
+        body: submissionData,
+      });
+      const result = await res.json();
+      console.log(result);
+    } catch(err) {
+      console.log(err);
+    }
   };
 
   return (
@@ -170,7 +175,7 @@ export default function Page() {
         </span>
         <div className="w-full sm:w-3/4 mt-4">
           <Image
-            src="/assets/undraw/image_upload.svg" // Ilustrasi yang lebih relevan
+            src="/assets/undraw/time-management.svg"
             height={5000}
             width={5000}
             alt="image upload illustration"
@@ -208,7 +213,11 @@ interface FormImagesProps {
   ) => void;
   formStatus?: StatusForm;
 }
-const FormImages = ({ formData, handleImageChange, formStatus }: FormImagesProps) => {
+const FormImages = ({
+  formData,
+  handleImageChange,
+  formStatus,
+}: FormImagesProps) => {
   const isStepValid = !Object.values(formStatus?.images || {}).some(
     (field) => field.status
   );
@@ -221,9 +230,10 @@ const FormImages = ({ formData, handleImageChange, formStatus }: FormImagesProps
       </p>
       <div className="mt-8 flex flex-col gap-8">
         {(
-          Object.keys(formData.images) as Array<
+          formData &&
+          (Object.keys(formData.images) as Array<
             keyof BphSettingsFormData["images"]
-          >
+          >)
         ).map((key, index) => (
           <InputFile
             key={key}
