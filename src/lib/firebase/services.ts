@@ -1,7 +1,7 @@
 import { app } from "./config";
 import { getFirestore, collection, addDoc, getDocs, query, where, getDoc, doc, updateDoc } from "firebase/firestore";
 import bcrypt from "bcryptjs";
-import type { UserType, DivisiSettingsType, FormBlog } from "@/types";
+import type { UserType, DivisiSettingsType, FormBlog, PertemuanFormData } from "@/types";
 
 const firestore = getFirestore(app);
 
@@ -177,5 +177,35 @@ export async function updateBlog(id: string, data: Partial<FormBlog>) {
     return { ok: true, message: "Blog berhasil di update." }
   } catch (err) {
     return { ok: false, message: err instanceof Error ? err.message : "Unknown error" }
+  }
+}
+
+export async function addPertemuan(data: PertemuanFormData, callback: (result: { success: boolean; message?: string }) => void) {
+  try {
+    await addDoc(collection(firestore, "pertemuan"), data).then(() => {
+      callback({ success: true, message: "Pertemuan berhasil ditambahkan." });
+    }).catch((err) => {
+      callback({ success: false, message: err.message });
+    });
+  } catch {
+    return callback({ success: false, message: "Opps something went wrong in the server." });
+  }
+}
+
+export async function updatePertemuan(data: Partial<PertemuanFormData>, id: string) {
+  try {
+    const snapshot = await getDoc(doc(firestore, "pertemuan", id));
+
+    if (!snapshot.exists()) {
+      return { ok: false, message: "Data pertemuan tidak ditemukan." }
+    }
+    const docRef = doc(firestore, "pertemuan", snapshot.id);
+    await updateDoc(docRef, {
+      ...data,
+      updatedAt: new Date()
+    });
+    return { ok: true, message: "Pertemuan berhasil di update." }
+  } catch {
+    return { ok: false, message: "ada sesusati yang salah di database." }
   }
 }

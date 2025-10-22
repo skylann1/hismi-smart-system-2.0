@@ -1,12 +1,16 @@
+"use client";
 
+import { useEffect, useState } from "react";
 import ReusableTable, {
   type TableHeader,
   type TableRow,
-} from "@/components/ui/moleculs/table/PrimaryTable"; 
+} from "@/components/ui/moleculs/table/PrimaryTable";
 import Link from "next/link";
+import Image from "next/image";
+import { motion } from "framer-motion";
 
 const tableHeaders: TableHeader[] = [
-  { key: "title", label: "Judul Pertemuan" },
+  { key: "judul", label: "Judul Pertemuan" },
   { key: "lokasi", label: "Lokasi" },
   { key: "status", label: "Status" },
   { key: "tanggal", label: "Tanggal" },
@@ -22,60 +26,124 @@ const StatusBadge = ({ status }: { status: "Upcoming" | "Passed" }) => {
     );
   }
   return (
-    <span className={`${baseClasses} bg-gray-100 text-gray-800`}>
-      Passed
-    </span>
+    <span className={`${baseClasses} bg-gray-100 text-gray-800`}>Passed</span>
   );
 };
 
-
-const pertemuanData: TableRow[] = [
-  {
-    id: "meet-001",
-    title: "Rapat Bulanan BPH & Koordinator",
-    lokasi: "Sekretariat HIMSI",
-    status: <StatusBadge status="Upcoming" />,
-    tanggal: "30 Agustus 2025",
-  },
-  {
-    id: "meet-002",
-    title: "Evaluasi Program Kerja Divisi Pendidikan",
-    lokasi: "Ruang Rapat Kampus",
-    status: <StatusBadge status="Upcoming" />,
-    tanggal: "5 September 2025",
-  },
-  {
-    id: "meet-003",
-    title: "Persiapan Acara Makrab",
-    lokasi: "Online (Google Meet)",
-    status: <StatusBadge status="Passed" />,
-    tanggal: "15 Agustus 2025",
-  },
-  {
-    id: "meet-004",
-    title: "Kumpul Santai & Sharing Session",
-    lokasi: "Taman Kota",
-    status: <StatusBadge status="Passed" />,
-    tanggal: "1 Agustus 2025",
-  },
-];
-
 const DaftarPertemuan = () => {
+  // Fetch data from the server or any other asynchronous operation
+  const url = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/pertemuan`;
+  const [data, setData] = useState<TableRow[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  type Pertemuan = {
+    id: string | number;
+    judul: string;
+    lokasi?: string;
+    status: "Upcoming" | "Passed";
+    tanggal?: string;
+    [key: string]: unknown;
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(url, { cache: "no-store" });
+        const json = await response.json();
+        const rawData = json.data as Pertemuan[];
+
+        if (!response.ok) throw new Error("Failed to fetch data");
+
+        const mappedData: TableRow[] = rawData.map((item: Pertemuan) => ({
+          id: item.id,
+          judul: item.judul,
+          lokasi: item.lokasi ?? "",
+          status: <StatusBadge status={item.status} />,
+          tanggal: item.tanggal ?? "",
+        }));
+
+        setData(mappedData);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
-    <ReusableTable
-      title="Daftar Jadwal Pertemuan"
-      description="Semua jadwal pertemuan dan acara HIMSI UBSI KLA. Jadwal yang sudah lewat akan ditandai sebagai 'Passed'."
-      headers={tableHeaders}
-      data={pertemuanData}
-      renderActions={(pertemuan) => (
-        <Link
-          href={`pertemuan/edit/${pertemuan.id}`}
-          className="font-medium text-blue-600 hover:underline"
-        >
-          Edit
-        </Link>
+    <>
+      {isLoading ? (
+        <div className="w-full bg-white h-[75vh] flex flex-col justify-center items-center gap-6 p-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="relative flex flex-col items-center"
+          >
+            <Image
+              src="/assets/undraw/on-the-way.svg"
+              alt="Loading illustration"
+              width={300}
+              height={300}
+              className="w-[60%] lg:w-[40%] animate-pulse"
+            />
+            <motion.div
+              className="mt-6 text-gray-600 text-lg font-semibold tracking-wide"
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: [0.3, 1, 0.3],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              Loading data, please wait...
+            </motion.div>
+            <motion.div
+              className="mt-4 flex gap-2"
+              animate={{ opacity: [0.3, 1, 0.3] }}
+              transition={{
+                duration: 1.2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              <div className="w-3 h-3 bg-primary rounded-full"></div>
+              <div className="w-3 h-3 bg-primary rounded-full delay-150"></div>
+              <div className="w-3 h-3 bg-primary rounded-full delay-300"></div>
+            </motion.div>
+          </motion.div>
+        </div>
+      ) : (
+        <ReusableTable
+          title="Daftar Jadwal Pertemuan"
+          description="Semua jadwal pertemuan dan acara HIMSI UBSI KLA. Jadwal yang sudah lewat akan ditandai sebagai 'Passed'."
+          headers={tableHeaders}
+          data={data}
+          renderActions={(pertemuan) => (
+            <div className="flex gap-3">
+              <Link
+                href={`pertemuan/edit/${pertemuan.id}`}
+                className="font-medium text-blue-600 hover:underline"
+              >
+                Edit
+              </Link>
+              <Link
+                href={`pertemuan/delete/${pertemuan.id}`}
+                className="font-medium text-red-600 hover:underline"
+              >
+                Delete
+              </Link>
+            </div>
+          )}
+        />
       )}
-    />
+    </>
   );
 };
 

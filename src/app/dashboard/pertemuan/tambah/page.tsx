@@ -10,41 +10,94 @@ import { useState, useEffect } from "react";
 interface PertemuanFormData {
   judul: string;
   lokasi: string;
+  maps: string;
   tanggal: string;
-  status: "Upcoming" | "Passed";
+  status: "Upcoming" | "Passed" | "Ongoing";
+  metode: "Offline" | "Online";
+  penanggungJawab?: string;
+  nomerPenanggungJawab?: string;
 }
 
 export default function TambahPertemuanPage() {
+  const url = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/pertemuan/tambah`;
   const [formData, setFormData] = useState<PertemuanFormData>({
     judul: "",
     lokasi: "",
+    maps: "",
     tanggal: "",
     status: "Upcoming",
+    metode: "Offline",
+    penanggungJawab: "",
+    nomerPenanggungJawab: "",
   });
-  
+
   const [errors, setErrors] = useState({
     judul: { status: false, message: "" },
     lokasi: { status: false, message: "" },
     tanggal: { status: false, message: "" },
+    penanggungJawab: { status: false, message: "" },
+    nomerPenanggungJawab: { status: false, message: "" },
+    maps: { status: false, message: "" },
   });
 
   const [isFormValid, setIsFormValid] = useState(false);
 
   const validateField = (field: string, value: string) => {
     let error = { status: false, message: "" };
+
     switch (field) {
       case "judul":
-        if (!value.trim()) error = { status: true, message: "Judul wajib diisi" };
+        if (!value.trim())
+          error = { status: true, message: "Judul wajib diisi" };
         break;
+
       case "lokasi":
-        if (!value.trim()) error = { status: true, message: "Lokasi wajib diisi" };
+        if (!value.trim())
+          error = { status: true, message: "Lokasi wajib diisi" };
         break;
+
+      case "maps":
+        if (value.trim()) {
+          try {
+            new URL(value);
+          } catch {
+            error = { status: true, message: "Link tidak valid" };
+          }
+        }
+        break;
+
       case "tanggal":
         if (!value) error = { status: true, message: "Tanggal wajib diisi" };
         break;
+
+      case "penanggungJawab":
+        if (!value.trim())
+          error = { status: true, message: "Penanggung jawab wajib diisi" };
+        else if (/\d/.test(value))
+          error = {
+            status: true,
+            message: "Nama tidak boleh mengandung angka",
+          };
+        break;
+
+      case "nomerPenanggungJawab":
+        if (!value.trim())
+          error = {
+            status: true,
+            message: "Nomor penanggung jawab wajib diisi",
+          };
+        else if (!/^\d+$/.test(value))
+          error = { status: true, message: "Nomor hanya boleh berisi angka" };
+        else if (value.length < 10)
+          error = { status: true, message: "Nomor minimal 10 digit" };
+        else if (value.length > 15)
+          error = { status: true, message: "Nomor maksimal 15 digit" };
+        break;
+
       default:
         break;
     }
+
     setErrors((prev) => ({ ...prev, [field]: error }));
   };
 
@@ -56,24 +109,63 @@ export default function TambahPertemuanPage() {
   const statusOptions = [
     { value: "Upcoming", label: "Upcoming" },
     { value: "Passed", label: "Passed" },
+    { value: "Ongoing", label: "Ongoing" },
+  ];
+
+  const metodeOptions = [
+    { value: "Offline", label: "Offline" },
+    { value: "Online", label: "Online" },
   ];
 
   useEffect(() => {
-    const isErrorPresent = Object.values(errors).some(error => error.status);
-    const isDataMissing = !formData.judul || !formData.lokasi || !formData.tanggal;
+    const isErrorPresent = Object.values(errors).some((error) => error.status);
+    const isDataMissing =
+      !formData.judul ||
+      !formData.lokasi ||
+      !formData.tanggal ||
+      !formData.penanggungJawab ||
+      !formData.nomerPenanggungJawab;
+
     setIsFormValid(!isDataMissing && !isErrorPresent);
   }, [formData, errors]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isFormValid) {
-      console.log("Data baru yang akan dikirim:", formData);
-      alert("Pertemuan baru berhasil ditambahkan!");
+    try {
+      if (isFormValid) {
+        const submitData = async () => {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          });
+
+          if (!response.ok) {
+            console.log(response);
+            throw new Error("Network response was not ok");
+          }
+
+          const data = await response.json();
+          console.log("Data berhasil dikirim:", data);
+        };
+        submitData();
+      } else {
+        alert("Masih ada data yang belum valid bro 🚫");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
       setFormData({
         judul: "",
         lokasi: "",
+        maps: "",
         tanggal: "",
         status: "Upcoming",
+        metode: "Offline",
+        penanggungJawab: "",
+        nomerPenanggungJawab: "",
       });
     }
   };
@@ -101,8 +193,10 @@ export default function TambahPertemuanPage() {
         </div>
       </div>
 
-      {/* Right Section (Form) */}
-      <form onSubmit={handleSubmit} className="w-full bg-white rounded-lg p-4 sm:p-6 shadow-lg">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full bg-white rounded-lg p-4 sm:p-6 shadow-lg"
+      >
         <h2 className="text-xl font-semibold text-gray-800">
           Form Tambah Pertemuan
         </h2>
@@ -125,8 +219,27 @@ export default function TambahPertemuanPage() {
             onChange={(e) => handleChange("lokasi", e.target.value)}
             isError={errors.lokasi}
           />
+          <InputText
+            label="Maps / Online Link"
+            placeholder="Contoh: https://maps.app.goo.gl/nJYnmts6xEj2hAy9A"
+            name="maps"
+            type="text"
+            value={formData.maps}
+            onChange={(e) => handleChange("maps", e.target.value)}
+            isError={errors.maps}
+          />
+          <div className="flex flex-col gap-3">
+            <label className="text-sm font-medium text-gray-700">*Metode</label>
+            <RadioButtonGroup
+              className="grid grid-cols-2 gap-2"
+              options={metodeOptions}
+              name="metode"
+              value={formData.metode}
+              onChange={(value) => handleChange("metode", String(value))}
+            />
+          </div>
           <InputDate
-            label="Tanggal Pertemuan"
+            label="*Tanggal Pertemuan"
             onChange={(e) => handleChange("tanggal", e)}
             value={formData.tanggal}
             isError={errors.tanggal}
@@ -142,11 +255,30 @@ export default function TambahPertemuanPage() {
               onChange={(value) => handleChange("status", String(value))}
             />
           </div>
+          <InputText
+            label="*Penanggung Jawab"
+            placeholder="Contoh: Irfan Hakim"
+            name="penanggungJawab"
+            type="text"
+            value={formData.penanggungJawab}
+            onChange={(e) => handleChange("penanggungJawab", e.target.value)}
+            isError={errors.penanggungJawab}
+          />
+          <InputText
+            label="*Nomor Penanggung Jawab"
+            placeholder="Contoh: 08123456789"
+            name="nomerPenanggungJawab"
+            type="text"
+            value={formData.nomerPenanggungJawab}
+            onChange={(e) =>
+              handleChange("nomerPenanggungJawab", e.target.value)
+            }
+            isError={errors.nomerPenanggungJawab}
+          />
           <div className="w-full flex justify-end pb-1 mt-6">
             <button
               type="submit"
               disabled={!isFormValid}
-              aria-disabled={!isFormValid}
               className={`text-white ${
                 !isFormValid
                   ? "bg-gray-400 cursor-not-allowed"
