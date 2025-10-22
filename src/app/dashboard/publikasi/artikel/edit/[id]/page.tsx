@@ -181,7 +181,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(formData);
     try {
       setIsLoading(true);
       const formDataToSend = new FormData();
@@ -221,7 +220,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       });
 
       const result = await res.json();
-      console.log(result);
         if (!result.success) {
           dispatch(
             alertIsAktif({
