@@ -6,6 +6,9 @@ import InputText from "@/components/ui/moleculs/input/InputText";
 import InputDate from "@/components/ui/moleculs/input/InputDate";
 import RadioButtonGroup from "@/components/ui/moleculs/input/RadioButtonGroup";
 import { useState, useEffect } from "react";
+import { useAppDispatch } from "@/hooks/redux";
+import { alertIsAktif } from "@/features/alert/alertSlice";
+import { useRouter } from "next/navigation";
 
 interface PertemuanFormData {
   judul: string;
@@ -19,6 +22,8 @@ interface PertemuanFormData {
 }
 
 export default function TambahPertemuanPage() {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
   const url = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/pertemuan/tambah`;
   const [formData, setFormData] = useState<PertemuanFormData>({
     judul: "",
@@ -142,14 +147,28 @@ export default function TambahPertemuanPage() {
             body: JSON.stringify(formData),
           });
 
+          const data = await response.json();
+
           if (!response.ok) {
-            console.log(response);
+            dispatch(
+              alertIsAktif({
+                status: false,
+                title: "Error! Gagal menyimpan data ke sistem.",
+                message: data.message,
+              })
+            );
             throw new Error("Network response was not ok");
           }
-
-          const data = await response.json();
-          console.log("Data berhasil dikirim:", data);
+          dispatch(
+            alertIsAktif({
+              status: true,
+              title: "Success! Yes berhasil nih simpan data ke system.",
+              message: data.message,
+            })
+          );
+          router.push("/dashboard/pertemuan");
         };
+
         submitData();
       } else {
         alert("Masih ada data yang belum valid bro 🚫");

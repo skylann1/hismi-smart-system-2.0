@@ -1,7 +1,7 @@
 import { app } from "./config";
 import { getFirestore, collection, addDoc, getDocs, query, where, getDoc, doc, updateDoc } from "firebase/firestore";
 import bcrypt from "bcryptjs";
-import type { UserType, DivisiSettingsType, FormBlog, PertemuanFormData } from "@/types";
+import type { UserType, DivisiSettingsType, FormBlog, PertemuanFormData, ProkerFormData } from "@/types";
 
 const firestore = getFirestore(app);
 
@@ -207,5 +207,35 @@ export async function updatePertemuan(data: Partial<PertemuanFormData>, id: stri
     return { ok: true, message: "Pertemuan berhasil di update." }
   } catch {
     return { ok: false, message: "ada sesusati yang salah di database." }
+  }
+}
+
+export async function updateProker(data: Partial<ProkerFormData>, id: string) {
+  try {
+    const snapshot = await getDoc(doc(firestore, "proker", id));
+    if (!snapshot.exists()) {
+      return { ok: false, message: "Data proker tidak ditemukan." }
+    }
+    const docRef = doc(firestore, "proker", snapshot.id);
+    await updateDoc(docRef, {
+      ...data,
+      updatedAt: new Date()
+    });
+    return { ok: true, message: "Proker berhasil di update." }
+  } catch (err) {
+    console.error("Error updating proker:", err);
+    return { ok: false, message: "ada sesuatu yang salah di database." }
+  }
+}
+
+export async function addProker(data: ProkerFormData, callback: (result: { success: boolean; message?: string }) => void) {
+  try {
+    await addDoc(collection(firestore, "proker"), data).then(() => {
+      callback({ success: true, message: "Proker berhasil ditambahkan." });
+    }).catch((err) => {
+      callback({ success: false, message: err.message });
+    });
+  } catch {
+    return callback({ success: false, message: "Opps something went wrong in the server." });
   }
 }

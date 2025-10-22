@@ -7,17 +7,17 @@ export async function GET(req: NextRequest) {
         const id = searchParams.get('id');
 
         if (id) {
-            const data = await getDataById("pertemuan", id);
+            const data = await getDataById("proker", id);
             if (data.success) {
-                return NextResponse.json({ success: true, message: "Data pertemuan retrieved successfully.", data: data.data }, { status: 200 })
+                return NextResponse.json({ success: true, message: "Data proker retrieved successfully.", data: data.data }, { status: 200 })
             } else {
                 return NextResponse.json({ success: false, message: data.message }, { status: 404 });
             }
         }
 
-        const data = await getData("pertemuan");
+        const data = await getData("proker");
         if (data.success) {
-            return NextResponse.json({ success: true, message: "Data pertemuan retrieved successfully", data: data.datas }, { status: 200 })
+            return NextResponse.json({ success: true, message: "Data proker retrieved successfully", data: data.datas }, { status: 200 })
         } else {
             return NextResponse.json({ success: false, message: data.error }, { status: 404 });
         }

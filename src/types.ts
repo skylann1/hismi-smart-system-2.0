@@ -66,3 +66,15 @@ export interface PertemuanFormData {
   penanggungJawab?: string;
   nomerPenanggungJawab?: string;
 }
+
+export interface ProkerFormData {
+  judul: string;
+  lokasi: string;
+  divisi: string;
+  tanggal_selesai: string;
+  status: "Berjalan" | "Selesai" | "Direncanakan";
+  penanggung_jawab: string;
+  deskripsi: string;
+  maps: string;
+  blogs: string;
+}
