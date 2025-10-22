@@ -37,3 +37,21 @@ export interface DivisiSettingsType {
         image5: string | File | null;
     };
 }
+
+interface Paragraph {
+  konten: string;
+}
+
+export interface FormBlog {
+  judul: string;
+  author: string;
+  paragraf: Paragraph[];
+  kategori: string;
+  tanggal: string;
+  status: string;
+  cover: File | null | string;
+  gambar_tambahan: {
+    gambar1: File | string;
+    gambar2: File | string;
+  };
+}

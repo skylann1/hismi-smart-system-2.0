@@ -9,6 +9,8 @@ import { FaTrashArrowUp } from "react-icons/fa6"; // Contoh ikon, ganti sesuai l
 import InputFile from "@/components/ui/moleculs/input/InputFile";
 import InputTextArea from "@/components/ui/moleculs/input/InputArea";
 import Image from "next/image";
+import { useAppDispatch } from "@/hooks/redux";
+import { alertIsAktif } from "@/features/alert/alertSlice";
 import { useRouter } from "next/navigation";
 
 // === INTERFACE DIUPDATE ===
@@ -16,7 +18,7 @@ interface Paragraph {
   konten: string;
 }
 
-interface FormArtikel {
+interface FormBlog {
   judul: string;
   author: string;
   paragraf: Paragraph[];
@@ -32,6 +34,8 @@ interface FormArtikel {
 
 // === KOMPONEN UTAMA ===
 export default function Page() {
+  const url = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/publikasi/blog/tambah`;
+  const dispatch = useAppDispatch();
 
   const router = useRouter();
   const [errors, setErrors] = useState({
@@ -46,7 +50,9 @@ export default function Page() {
     },
   });
 
-  const [formData, setFormData] = useState<FormArtikel>({
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const [formData, setFormData] = useState<FormBlog>({
     judul: "",
     author: "",
     paragraf: [{ konten: "" }],
@@ -82,7 +88,7 @@ export default function Page() {
 
   // --- VALIDASI DIPERBAIKI ---
   const validateField = (
-    field: keyof Omit<FormArtikel, "paragraf" | "gambar_tambahan" | "cover">,
+    field: keyof Omit<FormBlog, "paragraf" | "gambar_tambahan" | "cover">,
     value: string
   ) => {
     let error = { status: false, message: "" };
@@ -124,7 +130,7 @@ export default function Page() {
   };
 
   const handleChange = (
-    field: keyof Omit<FormArtikel, "cover" | "paragraf" | "gambar_tambahan">,
+    field: keyof Omit<FormBlog, "cover" | "paragraf" | "gambar_tambahan">,
     value: string
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -171,11 +177,70 @@ export default function Page() {
     setFormData((prev) => ({ ...prev, paragraf: newParagraphs }));
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form Submitted", formData);
-    router.push('result');
-    // alert("Artikel berhasil disubmit! Cek console.");
+    try {
+      setIsLoading(true);
+      const formDataToSend = new FormData();
+
+      for (const key in formData) {
+        const value = formData[key as keyof typeof formData];
+
+        if (key === "cover" && value instanceof File) {
+          formDataToSend.append("cover", value);
+        } else if (
+          key === "gambar_tambahan" &&
+          typeof value === "object" &&
+          value !== null
+        ) {
+          const gambarTambahan = value as {
+            gambar1: File | null;
+            gambar2: File | null;
+          };
+          if (gambarTambahan.gambar1)
+            formDataToSend.append("gambar_tambahan", gambarTambahan.gambar1);
+          if (gambarTambahan.gambar2)
+            formDataToSend.append("gambar_tambahan", gambarTambahan.gambar2);
+        } else if (key === "paragraf" && Array.isArray(value)) {
+          formDataToSend.append("paragraf", JSON.stringify(formData.paragraf));
+        } else if (
+          typeof value === "string" ||
+          typeof value === "number" ||
+          typeof value === "boolean"
+        ) {
+          formDataToSend.append(key, String(value));
+        }
+      }
+
+      const res = await fetch(url, {
+        method: "POST",
+        body: formDataToSend,
+      });
+
+      const result = await res.json();
+      if (!result.success) {
+        dispatch(
+          alertIsAktif({
+            status: false,
+            title:
+              "Opps! Sorry banget nih, belum dapet kesimpan ke dalam system.",
+            message: result.message,
+          })
+        );
+      }
+
+      dispatch(
+        alertIsAktif({
+          status: true,
+          title: "Success! Yes berhasil nih simpan data ke system.",
+          message: result.message,
+        })
+      );
+      setIsLoading(false);
+      router.push('/dashboard/publikasi/artikel')
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   useEffect(() => {
@@ -199,7 +264,6 @@ export default function Page() {
 
     setFormInputIsValid([isInformasiInvalid, isKontenInvalid, isGambarInvalid]);
   }, [formData, errors]);
-
 
   return (
     <DashboardSection className="w-full min-h-full p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-20 lg:gap-6">
@@ -420,14 +484,14 @@ export default function Page() {
               <ButtonBackForm onClick={() => setFormStep("konten")} />
               <button
                 type="submit"
-                disabled={formInputIsValid[2]}
+                disabled={formInputIsValid[2] || isLoading}
                 className={`text-white ${
-                  formInputIsValid[2]
+                  formInputIsValid[2] || isLoading
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-primary cursor-pointer"
                 } rounded-lg px-4 py-2`}
               >
-                Submit Artikel
+                {isLoading ? "submiting..." : "submit"}
               </button>
             </div>
           </div>

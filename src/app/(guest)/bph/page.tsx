@@ -5,7 +5,30 @@ import { AiFillAlert } from "react-icons/ai";
 import { FcTreeStructure } from "react-icons/fc";
 import { FaHandsHelping } from "react-icons/fa";
 
-export default function Page() {
+export default async function Page() {
+  const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/bph`;
+
+  const fetchBph = async () => {
+    try {
+      const fetchBph = await fetch(url, { next: { revalidate: 86400 } });
+      if (!fetchBph) {
+        console.error(`Failed to fetch data for bph`);
+        return null;
+      }
+
+      const result = await fetchBph.json();
+      const { images } = result.data;
+      return images;
+    } catch {
+      console.error("Opps error when you try catch data BPH");
+      return null;
+    }
+  };
+
+  // const data = await fetchBph || undefined;
+  const data = await fetchBph();
+  console.log(data);
+
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col items-center justify-center max-w-7xl">
       {/* section 1 */}
@@ -350,7 +373,6 @@ const MemberCard = ({
   urlImage,
   name,
   position,
-
 }: {
   urlImage: string;
   name: string;

@@ -1,7 +1,7 @@
 import { app } from "./config";
 import { getFirestore, collection, addDoc, getDocs, query, where, getDoc, doc, updateDoc } from "firebase/firestore";
 import bcrypt from "bcryptjs";
-import type { UserType, DivisiSettingsType } from "@/types";
+import type { UserType, DivisiSettingsType, FormBlog } from "@/types";
 
 const firestore = getFirestore(app);
 
@@ -144,5 +144,38 @@ export async function updateDivisiDesc(
   } catch (error) {
     console.error("Error updateDivisiDesc:", error);
     return { ok: false, message: "Gagal update divisi", error };
+  }
+}
+
+export async function addBlog(data: FormBlog, callback: (result: { success: boolean; message?: string }) => void) {
+  try {
+    await addDoc(collection(firestore, "blog"), data).then(() => {
+      callback({ success: true, message: "Blog berhasil di tambahkan ke system." })
+    }).catch((err) => {
+      callback({ success: false, message: err.message })
+    })
+  } catch {
+    return callback({ success: true, message: "Opps something when wrong in the server." })
+  }
+}
+
+export async function updateBlog(id: string, data: Partial<FormBlog>) {
+  try {
+    const snapshot = await getDoc(doc(firestore, "blog", id));
+
+    if (!snapshot.exists()) {
+      return { ok: false, message: "Data tidak di temukan.", data: snapshot.data() }
+    }
+
+    const docRef = doc(firestore, "blog", snapshot.id);
+
+    await updateDoc(docRef, {
+      ...data,
+      updatedAt: new Date()
+    });
+
+    return { ok: true, message: "Blog berhasil di update." }
+  } catch (err) {
+    return { ok: false, message: err instanceof Error ? err.message : "Unknown error" }
   }
 }
