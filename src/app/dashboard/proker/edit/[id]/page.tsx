@@ -10,17 +10,20 @@ import InputTextArea from "@/components/ui/moleculs/input/InputArea";
 import { useAppDispatch } from "@/hooks/redux";
 import { alertIsAktif } from "@/features/alert/alertSlice";
 import { useRouter } from "next/navigation";
+import InputTime from "@/components/ui/moleculs/input/InputTime";
 
 interface ProkerFormData {
   judul: string;
   lokasi: string;
   divisi: string;
-  tanggal_selesai: string;
-  status: "Berjalan" | "Selesai" | "Direncanakan";
+  tanggal: string;
+  status: "Upcoming" | "Passed" | "Ongoing";
   penanggung_jawab: string;
   deskripsi: string;
   maps: string;
   blogs: string;
+  jamMulai: string;
+  jamSelesai: string;
 }
 
 export default function TambahProkerPage({
@@ -36,21 +39,25 @@ export default function TambahProkerPage({
     judul: "",
     lokasi: "",
     divisi: "pendidikan", // Nilai default
-    tanggal_selesai: "",
-    status: "Direncanakan", // Nilai default
+    tanggal: "",
+    status: "Ongoing", // Nilai default
     penanggung_jawab: "",
     deskripsi: "",
     maps: "",
     blogs: "",
+    jamMulai: "",
+    jamSelesai: "",
   });
   const [errors, setErrors] = useState({
     judul: { status: false, message: "" },
     lokasi: { status: false, message: "" },
-    tanggal_selesai: { status: false, message: "" },
+    tanggal: { status: false, message: "" },
     penanggung_jawab: { status: false, message: "" },
     deskripsi: { status: false, message: "" },
     maps: { status: false, message: "" },
     blogs: { status: false, message: "" },
+    jamMulai: { status: false, message: "" },
+    jamSelesai: { status: false, message: "" },
   });
   const [isFormValid, setIsFormValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -76,8 +83,20 @@ export default function TambahProkerPage({
           error = { status: true, message: "Nama lokasi terlalu pendek" };
         }
         break;
-
-      case "tanggal_selesai":
+      case "jamMulai":
+        if (!value) error = { status: true, message: "Jam mulai wajib diisi" };
+        break;
+      case "jamSelesai":
+        if (!value) {
+          error = { status: true, message: "Jam selesai wajib diisi" };
+        } else if (formData.jamMulai && value <= formData.jamMulai) {
+          error = {
+            status: true,
+            message: "Jam selesai harus lebih dari jam mulai",
+          };
+        }
+        break;
+      case "tanggal":
         if (!value) {
           error = { status: true, message: "Tanggal target wajib diisi" };
         } else {
@@ -149,15 +168,15 @@ export default function TambahProkerPage({
   ];
 
   const statusOptions = [
-    { value: "Direncanakan", label: "Direncanakan" },
-    { value: "Berjalan", label: "Berjalan" },
-    { value: "Selesai", label: "Selesai" },
+    { value: "Upcoming", label: "Upcoming" },
+    { value: "Passed", label: "Passed" },
+    { value: "Ongoing", label: "Ongoing" },
   ];
 
   useEffect(() => {
     const isErrorPresent = Object.values(errors).some((error) => error.status);
     const isDataMissing =
-      !formData.judul || !formData.lokasi || !formData.tanggal_selesai;
+      !formData.judul || !formData.lokasi || !formData.tanggal;
     setIsFormValid(!isDataMissing && !isErrorPresent);
   }, [formData, errors]);
 
@@ -203,12 +222,14 @@ export default function TambahProkerPage({
         judul: "",
         lokasi: "",
         divisi: "pendidikan",
-        tanggal_selesai: "",
-        status: "Direncanakan",
+        tanggal: "",
+        status: "Ongoing",
         penanggung_jawab: "",
         deskripsi: "",
         maps: "",
         blogs: "",
+        jamMulai: "",
+        jamSelesai: "",
       });
     }
   };
@@ -230,12 +251,14 @@ export default function TambahProkerPage({
           judul: data.judul || "",
           lokasi: data.lokasi || "",
           maps: data.maps || "",
-          tanggal_selesai: data.tanggal_selesai || "",
+          tanggal: data.tanggal || "",
           status: data.status || "Direncanakan",
           penanggung_jawab: data.penanggung_jawab || "",
           deskripsi: data.deskripsi || "",
           divisi: data.divisi || "pendidikan",
           blogs: data.blogs || "",
+          jamMulai: data.jamMulai || "",
+          jamSelesai: data.jamSelesai || "",
         });
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -354,11 +377,29 @@ export default function TambahProkerPage({
 
             <InputDate
               label="*Target Tanggal"
-              onChange={(e) => handleChange("tanggal_selesai", e)}
-              value={formData.tanggal_selesai}
-              isError={errors.tanggal_selesai}
+              onChange={(e) => handleChange("tanggal", e)}
+              value={formData.tanggal}
+              isError={errors.tanggal}
               disableFutureDates={false}
             />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InputTime
+                label="Jam Mulai"
+                name="jamMulai"
+                value={formData.jamMulai}
+                onChange={handleChange}
+                error={errors.jamMulai}
+                required
+              />
+              <InputTime
+                label="Jam Selesai"
+                name="jamSelesai"
+                value={formData.jamSelesai}
+                onChange={handleChange}
+                error={errors.jamSelesai}
+                required
+              />
+            </div>
             <div className="flex flex-col gap-3">
               <label className="text-sm font-medium text-gray-700">
                 *Status

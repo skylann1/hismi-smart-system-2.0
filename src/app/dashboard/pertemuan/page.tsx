@@ -16,12 +16,18 @@ const tableHeaders: TableHeader[] = [
   { key: "tanggal", label: "Tanggal" },
 ];
 
-const StatusBadge = ({ status }: { status: "Upcoming" | "Passed" }) => {
+const StatusBadge = ({ status }: { status: "Upcoming" | "Passed" | "Ongoing" }) => {
   const baseClasses = "px-3 py-1 text-xs font-medium rounded-full";
   if (status === "Upcoming") {
     return (
       <span className={`${baseClasses} bg-blue-100 text-blue-800`}>
         Upcoming
+      </span>
+    );
+  } else if (status === "Ongoing") {
+    return (
+      <span className={`${baseClasses} bg-yellow-100 text-yellow-800`}>
+        Ongoing
       </span>
     );
   }
@@ -40,7 +46,7 @@ const DaftarPertemuan = () => {
     id: string | number;
     judul: string;
     lokasi?: string;
-    status: "Upcoming" | "Passed";
+    status: "Upcoming" | "Passed" | "Ongoing";
     tanggal?: string;
     [key: string]: unknown;
   };

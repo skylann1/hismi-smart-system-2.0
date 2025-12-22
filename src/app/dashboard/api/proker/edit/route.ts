@@ -5,8 +5,7 @@ export async function PATCH(req: NextRequest) {
     try {
         const formData = await req.json();
         const id = formData.id;
-        console.log(formData, id);
-
+ 
         const dataToUpdate = { ...formData };
         delete dataToUpdate.id;
         const res = await updateProker(dataToUpdate, id);

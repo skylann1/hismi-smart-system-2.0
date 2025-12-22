@@ -1,9 +1,12 @@
-// app/absensi/page.tsx atau halaman lainnya
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 
 import ReusableTable, {
   type TableHeader,
-} from "@/components/ui/moleculs/table/PrimaryTable"; // Pastikan path ini benar
+} from "@/components/ui/moleculs/table/PrimaryTable";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import LoadingTableComponent from "@/components/ui/moleculs/LoadingTableComponent";
 
 const tableHeaders: TableHeader[] = [
   { key: "nama", label: "Nama Anggota" },
@@ -14,92 +17,91 @@ const tableHeaders: TableHeader[] = [
   { key: "status", label: "Status" },
 ];
 
-// Tipe data untuk status absensi
 type AbsensiStatus = "Aman" | "Warning" | "Dropout";
 
 const StatusBadge = ({ status }: { status: AbsensiStatus }) => {
-  const baseClasses = "px-3 py-1 text-xs font-medium rounded-full";
-  
-  switch (status) {
-    case "Warning":
-      return <span className={`${baseClasses} bg-yellow-100 text-yellow-800`}>Warning</span>;
-    case "Dropout":
-      return <span className={`${baseClasses} bg-red-100 text-red-800`}>Dropout</span>;
-    case "Aman":
-      return <span className={`${baseClasses} bg-green-100 text-green-800`}>Aman</span>;
-    default:
-      return null;
-  }
+  const base = "px-3 py-1 text-xs font-medium rounded-full";
+
+  if (status === "Warning")
+    return <span className={`${base} bg-yellow-100 text-yellow-800`}>Warning</span>;
+
+  if (status === "Dropout")
+    return <span className={`${base} bg-red-100 text-red-800`}>Dropout</span>;
+
+  return <span className={`${base} bg-green-100 text-green-800`}>Aman</span>;
 };
 
-const absensiRawData = [
-  {
-    id: "abs-001",
-    nama: "Ahmad Subarjo",
-    divisi: "Pendidikan",
-    jabatan: "Koordinator",
-    hadir: 8,
-    tidakHadir: 4, 
-  },
-  {
-    id: "abs-002",
-    nama: "Budi Santoso",
-    divisi: "Kominfo",
-    jabatan: "Anggota",
-    hadir: 10,
-    tidakHadir: 2, 
-  },
-  {
-    id: "abs-003",
-    nama: "Citra Lestari",
-    divisi: "RSDM",
-    jabatan: "Anggota",
-    hadir: 7,
-    tidakHadir: 5,
-  },
-  {
-    id: "abs-004",
-    nama: "Dewi Anggraini",
-    divisi: "Litbang",
-    jabatan: "Koordinator",
-    hadir: 9,
-    tidakHadir: 3, 
-  },
-   {
-    id: "abs-005",
-    nama: "Eko Prasetyo",
-    divisi: "BPH",
-    jabatan: "Ketua",
-    hadir: 12,
-    tidakHadir: 0, // Status "Aman"
-  },
-];
+// izin & sakit dihitung hadir
+const isHadir = (status: string) =>
+  ["hadir", "izin", "sakit"].includes(status?.toLowerCase());
 
 const DaftarAbsensi = () => {
-  const processedData = absensiRawData.map(anggota => {
-    let status: AbsensiStatus = "Aman";
-    if (anggota.tidakHadir >= 5) {
-      status = "Dropout";
-    } else if (anggota.tidakHadir >= 3) {
-      status = "Warning";
+  const [absensiData, setAbsensiData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/kehadiran/summary`,
+          { cache: "no-store" }
+        );
+        const json = await res.json();
+        setAbsensiData(json.data || []);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // 🔥 GROUPING PER ANGGOTA
+  const grouped = absensiData.reduce((acc: any, item: any) => {
+    const id = item.id; // atau anggotaId
+
+    if (!acc[id]) {
+      acc[id] = {
+        id,
+        nama: item.nama,
+        divisi: item.divisi,
+        jabatan: item.jabatan,
+        hadir: 0,
+        tidakHadir: 0,
+      };
     }
 
+    if (isHadir(item.status)) acc[id].hadir += 1;
+    else acc[id].tidakHadir += 1;
+
+    return acc;
+  }, {});
+
+  const processedData = Object.values(grouped).map((a: any) => {
+    let status: AbsensiStatus = "Aman";
+    if (a.tidakHadir >= 5) status = "Dropout";
+    else if (a.tidakHadir >= 3) status = "Warning";
+
     return {
-      ...anggota,
+      ...a,
       status: <StatusBadge status={status} />,
     };
   });
 
+  if (loading) return <LoadingTableComponent/>;
+
   return (
     <ReusableTable
       title="Daftar Absensi Anggota"
-      description="Rekapitulasi jumlah kehadiran seluruh anggota HIMSI UBSI KLA dalam satu periode."
+      description="Rekap kehadiran anggota"
       headers={tableHeaders}
-      data={processedData} // Gunakan data yang sudah diproses
+      data={processedData}
       renderActions={(anggota) => (
         <Link
-          href={`kehadiran/detail/${anggota.id}`} // Arahkan ke halaman detail absensi
-          className="font-medium text-blue-600 hover:underline"
+          href={`kehadiran/detail/${anggota.id}`}
+          className="text-blue-600 hover:underline"
         >
           Lihat Detail
         </Link>

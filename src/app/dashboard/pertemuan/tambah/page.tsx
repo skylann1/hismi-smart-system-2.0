@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { useAppDispatch } from "@/hooks/redux";
 import { alertIsAktif } from "@/features/alert/alertSlice";
 import { useRouter } from "next/navigation";
+import InputTime from "@/components/ui/moleculs/input/InputTime";
 
 interface PertemuanFormData {
   judul: string;
@@ -19,6 +20,8 @@ interface PertemuanFormData {
   metode: "Offline" | "Online";
   penanggungJawab?: string;
   nomerPenanggungJawab?: string;
+  jamMulai: string;
+  jamSelesai: string;
 }
 
 export default function TambahPertemuanPage() {
@@ -34,6 +37,8 @@ export default function TambahPertemuanPage() {
     metode: "Offline",
     penanggungJawab: "",
     nomerPenanggungJawab: "",
+    jamMulai: "",
+    jamSelesai: "",
   });
 
   const [errors, setErrors] = useState({
@@ -43,6 +48,8 @@ export default function TambahPertemuanPage() {
     penanggungJawab: { status: false, message: "" },
     nomerPenanggungJawab: { status: false, message: "" },
     maps: { status: false, message: "" },
+    jamMulai: { status: false, message: "" },
+    jamSelesai: { status: false, message: "" },
   });
 
   const [isFormValid, setIsFormValid] = useState(false);
@@ -84,7 +91,19 @@ export default function TambahPertemuanPage() {
             message: "Nama tidak boleh mengandung angka",
           };
         break;
-
+      case "jamMulai":
+        if (!value) error = { status: true, message: "Jam mulai wajib diisi" };
+        break;
+      case "jamSelesai":
+        if (!value) {
+          error = { status: true, message: "Jam selesai wajib diisi" };
+        } else if (formData.jamMulai && value <= formData.jamMulai) {
+          error = {
+            status: true,
+            message: "Jam selesai harus lebih dari jam mulai",
+          };
+        }
+        break;
       case "nomerPenanggungJawab":
         if (!value.trim())
           error = {
@@ -185,6 +204,8 @@ export default function TambahPertemuanPage() {
         metode: "Offline",
         penanggungJawab: "",
         nomerPenanggungJawab: "",
+        jamMulai: "",
+        jamSelesai: "",
       });
     }
   };
@@ -264,6 +285,24 @@ export default function TambahPertemuanPage() {
             isError={errors.tanggal}
             disableFutureDates={false}
           />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InputTime
+              label="Jam Mulai"
+              name="jamMulai"
+              value={formData.jamMulai}
+              onChange={handleChange}
+              error={errors.jamMulai}
+              required
+            />
+            <InputTime
+              label="Jam Selesai"
+              name="jamSelesai"
+              value={formData.jamSelesai}
+              onChange={handleChange}
+              error={errors.jamSelesai}
+              required
+            />
+          </div>
           <div className="flex flex-col gap-3">
             <label className="text-sm font-medium text-gray-700">*Status</label>
             <RadioButtonGroup

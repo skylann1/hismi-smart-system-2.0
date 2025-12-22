@@ -65,16 +65,56 @@ export interface PertemuanFormData {
   metode: "Offline" | "Online";
   penanggungJawab?: string;
   nomerPenanggungJawab?: string;
+  jamMulai: string;
+  jamSelesai: string;
 }
 
 export interface ProkerFormData {
   judul: string;
   lokasi: string;
   divisi: string;
-  tanggal_selesai: string;
-  status: "Berjalan" | "Selesai" | "Direncanakan";
+  tanggal: string;
+  status: "Upcoming" | "Passed" | "Ongoing";
   penanggung_jawab: string;
   deskripsi: string;
   maps: string;
   blogs: string;
+  jamMulai: string;
+  jamSelesai: string;
+
 }
+
+export interface KegiatanFormData {
+  judul: string;
+  lokasi: string;
+  divisi: string;
+  tanggal: string;
+  maps: string;
+  status: "Upcoming" | "Passed" | "Ongoing";
+  deskripsi: string;
+  jamMulai: string;
+  jamSelesai: string;
+}
+
+export interface PaslonType {
+  // id?: string;
+  nomor_urut: number;
+  tagline: string;
+  visi: string;
+  misi: string;
+  program_kerja: string;
+  ketua: {
+    nama: string;
+    nim: string;
+    semester: string;
+    foto: string; // URL dari Supabase
+  };
+  wakil: {
+    nama: string;
+    nim: string;
+    semester: string;
+    foto: string; // URL dari Supabase
+  };
+  createdAt: Date;
+};
+

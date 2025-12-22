@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { LuNotebookPen } from "react-icons/lu";
 import { GrMoney } from "react-icons/gr";
-import { IoIosPeople, IoIosAlbums } from "react-icons/io";
+import { IoIosPeople, IoIosAlbums, IoIosSettings } from "react-icons/io";
 import { FaBarsProgress } from "react-icons/fa6";
 import { MdConnectWithoutContact } from "react-icons/md";
 import { FaAddressBook, FaBusinessTime } from "react-icons/fa";
@@ -14,10 +14,41 @@ import { FaAssistiveListeningSystems } from "react-icons/fa";
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import { useAppDispatch } from "@/hooks/redux";
+import { FaPersonDotsFromLine } from "react-icons/fa6";
 
 type DashboardPropsType = {
   children: React.ReactNode[] | React.ReactElement[];
 };
+
+const ROLES = {
+  ALL_ACCESS: "-",
+  ANGGOTA: "1",
+  KOORDINATOR: "2",
+  EDITOR_ABSENSI: "3",
+  PUBLIKASI: "4",
+  KONSUL_HIMSI: "5",
+  KONSUL_TUGAS: "6",
+  BENDAHARA: "7",
+  SEKRETARIS: "8",
+  KETUA_WAKIL: "9",
+  SETTINGS: "10",
+};
+
+function hasAccess(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  userRoles: any[] | undefined | null,
+  requiredRole: string | string[]
+) {
+  if (!userRoles || userRoles.length === 0) return false;
+
+  if (userRoles.includes(ROLES.ALL_ACCESS)) return true;
+
+  if (Array.isArray(requiredRole)) {
+    return requiredRole.some((role) => userRoles.includes(role));
+  } else {
+    return userRoles.includes(requiredRole);
+  }
+}
 
 export default function Dashboard({ children }: DashboardPropsType) {
   const dispacth = useAppDispatch();
@@ -29,8 +60,9 @@ export default function Dashboard({ children }: DashboardPropsType) {
   }
 
   const { data: session } = useSession();
-  const user = session?.user as CustomUser | undefined;
+  const user = session?.user as CustomUser;
 
+  const userRoles = (user?.access as string[]) || [];
   useEffect(() => {
     const getDataUser = async () => {
       try {
@@ -46,7 +78,7 @@ export default function Dashboard({ children }: DashboardPropsType) {
           }
         }
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     };
 
@@ -64,6 +96,9 @@ export default function Dashboard({ children }: DashboardPropsType) {
   const [publikasiDrop, setPublikasiDrop] = useState(false);
   const [prokerDrop, setProkerDrop] = useState(false);
   const [kegiatanDrop, setKegiatanDrop] = useState(false);
+  const [pemiluDrop, setPemiluDrop] = useState(false);
+  const [settingsDrop, setSettingsDrop] = useState(false);
+  const [settingsPemiluDrop, setSettingsPemiluDrop] = useState(false);
   // state for date
   const [currentDate, setCurrentDate] = useState<Date | null>(null);
 
@@ -252,195 +287,212 @@ export default function Dashboard({ children }: DashboardPropsType) {
               </Link>
             </li>
 
-            <li>
-              <button
-                type="button"
-                onClick={() => {
-                  setAnggotaDrop(!anggotaDrop);
-                }}
-                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 "
-              >
-                <IoIosPeople className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
-                <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
-                  Anggota
-                </span>
+            {/* editor anggota */}
+            {hasAccess(userRoles, [
+              ROLES.KOORDINATOR,
+              ROLES.KETUA_WAKIL,
+              ROLES.SETTINGS,
+            ]) && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAnggotaDrop(!anggotaDrop);
+                  }}
+                  className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 "
+                >
+                  <IoIosPeople className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
+                  <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
+                    Anggota
+                  </span>
 
-                <svg
-                  className={`w-3 h-3 transition-transform ${
-                    anggotaDrop ? "rotate-180" : "rotate-0"
+                  <svg
+                    className={`w-3 h-3 transition-transform ${
+                      anggotaDrop ? "rotate-180" : "rotate-0"
+                    }`}
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </button>
+                <ul
+                  className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
+                    anggotaDrop ? "block" : "hidden"
                   }`}
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
                 >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </button>
-              <ul
-                className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
-                  anggotaDrop ? "block" : "hidden"
-                }`}
-              >
-                <li>
-                  <Link
-                    href="/dashboard/anggota"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    List anggota
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/dashboard/anggota/tambah"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    Tambah anggota
-                  </Link>
-                </li>
-              </ul>
-            </li>
+                  <li>
+                    <Link
+                      href="/dashboard/anggota"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      List anggota
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/dashboard/anggota/tambah"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      Tambah anggota
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            )}
 
-            <li>
-              <button
-                type="button"
-                onClick={() => {
-                  setPertemuanDrop(!pertemuanDrop);
-                }}
-                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 cursor-pointer"
-              >
-                <svg
-                  className="shrink-0 w-5 h-5 text-gray-500 transition duration-75"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 18 18"
+            {/* editor pertemuan/rapat */}
+            {hasAccess(userRoles, [
+              ROLES.KETUA_WAKIL,
+              ROLES.SETTINGS,
+              ROLES.SEKRETARIS,
+            ]) && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPertemuanDrop(!pertemuanDrop);
+                  }}
+                  className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 cursor-pointer"
                 >
-                  <path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z" />
-                </svg>
-                <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
-                  Pertemuan
-                </span>
+                  <svg
+                    className="shrink-0 w-5 h-5 text-gray-500 transition duration-75"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 18 18"
+                  >
+                    <path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z" />
+                  </svg>
+                  <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
+                    Pertemuan
+                  </span>
 
-                <svg
-                  className={`w-3 h-3 transition-transform ${
-                    pertemuanDrop ? "rotate-180" : "rotate-0"
+                  <svg
+                    className={`w-3 h-3 transition-transform ${
+                      pertemuanDrop ? "rotate-180" : "rotate-0"
+                    }`}
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </button>
+                <ul
+                  className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
+                    pertemuanDrop ? "block" : "hidden"
                   }`}
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
                 >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </button>
-              <ul
-                className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
-                  pertemuanDrop ? "block" : "hidden"
-                }`}
-              >
-                <li>
-                  <Link
-                    href="/dashboard/pertemuan"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    pertemuan
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/dashboard/pertemuan/tambah"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    Tambah pertemuan
-                  </Link>
-                </li>
-              </ul>
-            </li>
+                  <li>
+                    <Link
+                      href="/dashboard/pertemuan"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      pertemuan
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/dashboard/pertemuan/tambah"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      Tambah pertemuan
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            )}
+            {/* PUBLIKASI KOMINFO */}
+            {hasAccess(userRoles, [ROLES.PUBLIKASI, ROLES.SETTINGS]) && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPublikasiDrop(!publikasiDrop);
+                  }}
+                  className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 cursor-pointer"
+                >
+                  <FaAssistiveListeningSystems className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
+                  <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
+                    Publikasi
+                  </span>
 
-            <li>
-              <button
-                type="button"
-                onClick={() => {
-                  setPublikasiDrop(!publikasiDrop);
-                }}
-                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 cursor-pointer"
-              >
-                <FaAssistiveListeningSystems className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
-                <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
-                  Publikasi
-                </span>
-
-                <svg
-                  className={`w-3 h-3 transition-transform ${
-                    publikasiDrop ? "rotate-180" : "rotate-0"
+                  <svg
+                    className={`w-3 h-3 transition-transform ${
+                      publikasiDrop ? "rotate-180" : "rotate-0"
+                    }`}
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </button>
+                <ul
+                  className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
+                    publikasiDrop ? "block" : "hidden"
                   }`}
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
                 >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </button>
-              <ul
-                className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
-                  publikasiDrop ? "block" : "hidden"
-                }`}
-              >
-                <li>
-                  <Link
-                    href="/dashboard/publikasi/divisi"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    Divisi
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/dashboard/publikasi/bph"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    BPH
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/dashboard/publikasi/artikel"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    artikel
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/dashboard/publikasi/galeri"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    Galeri
-                  </Link>
-                </li>
-              </ul>
-            </li>
+                  <li>
+                    <Link
+                      href="/dashboard/publikasi/divisi"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      Divisi
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/dashboard/publikasi/bph"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      BPH
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/dashboard/publikasi/artikel"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      artikel
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/dashboard/publikasi/galeri"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      Galeri
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            )}
 
+            {/* ALBUM FOTO */}
             <li>
               <Link
                 href="/dashboard/album-foto"
@@ -451,195 +503,393 @@ export default function Dashboard({ children }: DashboardPropsType) {
               </Link>
             </li>
 
-            <li>
-              <button
-                type="button"
-                onClick={() => {
-                  setNotulenDrop(!notulenDrop);
-                }}
-                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 "
-              >
-                <LuNotebookPen className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
-
-                <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
-                  Notulensi
-                </span>
-
-                <svg
-                  className={`w-3 h-3 transition-transform ${
-                    notulenDrop ? "rotate-180" : "rotate-0"
-                  }`}
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
+            {/* NOTULENSI */}
+            {hasAccess(userRoles, [
+              ROLES.SEKRETARIS,
+              ROLES.KETUA_WAKIL,
+              ROLES.SETTINGS,
+            ]) && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNotulenDrop(!notulenDrop);
+                  }}
+                  className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 "
                 >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </button>
-              <ul
-                className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
-                  notulenDrop ? "block" : "hidden"
-                }`}
-              >
-                <li>
-                  <Link
-                    href="/dashboard/notulensi"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                  <LuNotebookPen className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
+
+                  <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
+                    Notulensi
+                  </span>
+
+                  <svg
+                    className={`w-3 h-3 transition-transform ${
+                      notulenDrop ? "rotate-180" : "rotate-0"
+                    }`}
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
                   >
-                    List notulensi
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </button>
+                <ul
+                  className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
+                    notulenDrop ? "block" : "hidden"
+                  }`}
+                >
+                  <li>
+                    <Link
+                      href="/dashboard/notulensi"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      List notulensi
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="#"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      Tambah notulensi
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            )}
+
+            {/* KEUANGAN BENDAHAR*/}
+            {hasAccess(userRoles, [
+              ROLES.BENDAHARA,
+              ROLES.KETUA_WAKIL,
+              ROLES.SETTINGS,
+            ]) && (
+              <li>
+                <Link
+                  href="/dashboard/keuangan"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  hover:bg-gray-100  group"
+                >
+                  <GrMoney className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
+
+                  <span className="ms-3 font-inter-medium">Keuangan</span>
+                </Link>
+              </li>
+            )}
+
+            {/* PROKER UNTUK KOORDINATOR DAN BPH */}
+            {hasAccess(userRoles, [
+              ROLES.KOORDINATOR,
+              ROLES.KETUA_WAKIL,
+              ROLES.SETTINGS,
+            ]) && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProkerDrop(!prokerDrop);
+                  }}
+                  className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 cursor-pointer"
+                >
+                  <FaBarsProgress className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
+                  <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
+                    Proker
+                  </span>
+
+                  <svg
+                    className={`w-3 h-3 transition-transform ${
+                      prokerDrop ? "rotate-180" : "rotate-0"
+                    }`}
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
                   >
-                    Tambah notulensi
-                  </Link>
-                </li>
-              </ul>
-            </li>
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </button>
+                <ul
+                  className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
+                    prokerDrop ? "block" : "hidden"
+                  }`}
+                >
+                  <li>
+                    <Link
+                      href="/dashboard/proker"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      List proker
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/dashboard/proker/tambah"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      Tambah proker
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            )}
 
-            <li>
-              <Link
-                href="/dashboard/keuangan"
-                className="flex items-center p-2 text-gray-900 rounded-lg  hover:bg-gray-100  group"
-              >
-                <GrMoney className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
+            {/* KEGIATAN UNTUK KOORD DAN KETUM */}
+            {hasAccess(userRoles, [
+              ROLES.KOORDINATOR,
+              ROLES.KETUA_WAKIL,
+              ROLES.SETTINGS,
+            ]) && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setKegiatanDrop(!kegiatanDrop);
+                  }}
+                  className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 cursor-pointer"
+                >
+                  <MdConnectWithoutContact className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
+                  <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
+                    Kegiatan
+                  </span>
 
-                <span className="ms-3 font-inter-medium">Keuangan</span>
-              </Link>
-            </li>
+                  <svg
+                    className={`w-3 h-3 transition-transform ${
+                      kegiatanDrop ? "rotate-180" : "rotate-0"
+                    }`}
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </button>
+                <ul
+                  className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
+                    kegiatanDrop ? "block" : "hidden"
+                  }`}
+                >
+                  <li>
+                    <Link
+                      href="/dashboard/kegiatan"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      List kegiatan
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/dashboard/kegiatan/tambah"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      Tambah kegiatan
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            )}
 
+            {/* KEHADIRAN UNTUK RSDM */}
+            {hasAccess(userRoles, [ROLES.EDITOR_ABSENSI, ROLES.SETTINGS]) && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setKehadiranDrop(!kehadiranDrop);
+                  }}
+                  className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 cursor-pointer"
+                >
+                  <FaAddressBook className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
+
+                  <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
+                    Kehadiran
+                  </span>
+
+                  <svg
+                    className={`w-3 h-3 transition-transform`}
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </button>
+                <ul
+                  className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
+                    kehadiranDrop ? "block" : "hidden"
+                  }`}
+                >
+                  <li>
+                    <Link
+                      href="/dashboard/kehadiran"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      Kehadiran anggota
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/dashboard/kehadiran/absen"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      Absen
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            )}
+
+            {/* SETTING KONFIGURASI */}
+            {hasAccess(userRoles, [ROLES.SETTINGS]) && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSettingsDrop(!settingsDrop);
+                  }}
+                  className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 cursor-pointer"
+                >
+                  <IoIosSettings className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
+
+                  <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
+                    settings
+                  </span>
+
+                  <svg
+                    className={`w-3 h-3 transition-transform`}
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </button>
+                <ul
+                  className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
+                    settingsDrop ? "block" : "hidden"
+                  }`}
+                >
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => setSettingsPemiluDrop(!settingsPemiluDrop)}
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100 cursor-pointer"
+                    >
+                      <span className="flex-1 text-left whitespace-nowrap">
+                        Pemilu
+                      </span>
+
+                      <svg
+                        className={`w-3 h-3 mr-2 transition-transform duration-200 ${
+                          pemiluDrop ? "rotate-180" : ""
+                        }`}
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 10 6"
+                      >
+                        <path
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="m1 1 4 4 4-4"
+                        />
+                      </svg>
+                    </button>
+
+                    <ul
+                      className={`py-1 space-y-1 transition-all duration-200 ${
+                        settingsPemiluDrop ? "block" : "hidden"
+                      }`}
+                    >
+                      <li>
+                        <Link
+                          href="/dashboard/settings/pemilu/konfiguration"
+                          className="flex items-center w-full p-2 text-sm text-gray-700 transition duration-200 rounded-lg pl-16 group hover:bg-gray-100 hover:text-blue-600"
+                        >
+                          Konfigurasi
+                        </Link>
+                      </li>
+
+                      <li>
+                        <Link
+                          href="/dashboard/settings/pemilu/kandidat"
+                          className="flex items-center w-full p-2 text-sm text-gray-700 transition duration-200 rounded-lg pl-16 group hover:bg-gray-100 hover:text-blue-600"
+                        >
+                          Kandidat
+                        </Link>
+                      </li>
+
+                      <li>
+                        <Link
+                          href="/dashboard/settings/pemilu/stats" // Sesuaikan path voting lu
+                          className="flex items-center w-full p-2 text-sm text-gray-700 transition duration-200 rounded-lg pl-16 group hover:bg-gray-100 hover:text-blue-600"
+                        >
+                          Stats
+                        </Link>
+                      </li>
+                    </ul>
+                  </li>
+
+                  <li>
+                    <Link
+                      href="/dashboard/server"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      server
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            )}
+
+            {/* VOTTING TIME */}
             <li>
               <button
                 type="button"
                 onClick={() => {
-                  setProkerDrop(!prokerDrop);
+                  setPemiluDrop(!pemiluDrop);
                 }}
                 className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 cursor-pointer"
               >
-                <FaBarsProgress className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
-                <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
-                  Proker
-                </span>
-
-                <svg
-                  className={`w-3 h-3 transition-transform ${
-                    prokerDrop ? "rotate-180" : "rotate-0"
-                  }`}
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </button>
-              <ul
-                className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
-                  prokerDrop ? "block" : "hidden"
-                }`}
-              >
-                <li>
-                  <Link
-                    href="/dashboard/proker"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    List proker
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/dashboard/proker/tambah"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    Tambah proker
-                  </Link>
-                </li>
-              </ul>
-            </li>
-
-            <li>
-              <button
-                type="button"
-                onClick={() => {
-                  setKegiatanDrop(!kegiatanDrop);
-                }}
-                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 cursor-pointer"
-              >
-                <MdConnectWithoutContact className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
-                <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
-                  Kegiatan
-                </span>
-
-                <svg
-                  className={`w-3 h-3 transition-transform ${
-                    kegiatanDrop ? "rotate-180" : "rotate-0"
-                  }`}
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </button>
-              <ul
-                className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
-                  kegiatanDrop ? "block" : "hidden"
-                }`}
-              >
-                <li>
-                  <Link
-                    href="/dashboard/kegiatan"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    List kegiatan
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/dashboard/kegiatan/tambah"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    Tambah kegiatan
-                  </Link>
-                </li>
-              </ul>
-            </li>
-
-            <li>
-              <button
-                type="button"
-                onClick={() => {
-                  setKehadiranDrop(!kehadiranDrop);
-                }}
-                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 cursor-pointer"
-              >
-                <FaAddressBook className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
+                <FaPersonDotsFromLine className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
 
                 <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
-                  Kehadiran
+                  Pemilu
                 </span>
 
                 <svg
@@ -660,83 +910,27 @@ export default function Dashboard({ children }: DashboardPropsType) {
               </button>
               <ul
                 className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
-                  kehadiranDrop ? "block" : "hidden"
+                  pemiluDrop ? "block" : "hidden"
                 }`}
               >
                 <li>
                   <Link
-                    href="/dashboard/kehadiran"
+                    href="/dashboard/pemilu/votes"
                     className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
                   >
-                    Kehadiran anggota
+                    Votes
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/dashboard/kehadiran/absen"
+                    href="/dashboard/pemilu/result"
                     className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
                   >
-                    Absen
+                    Real count
                   </Link>
                 </li>
               </ul>
             </li>
-
-            {/* <li>
-              <button
-                type="button"
-                onClick={() => {
-                  setAbsenDrop(!absenDrop);
-                }}
-                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-200 rounded-lg group hover:bg-gray-100 "
-              >
-                <IoScanCircle className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
-
-                <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap font-inter-medium">
-                  Absensi
-                </span>
-
-                <svg
-                  className={`w-3 h-3 transition-transform ${
-                    absenDrop ? "rotate-180" : "rotate-0"
-                  }`}
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </button>
-              <ul
-                className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${
-                  absenDrop ? "block" : "hidden"
-                }`}
-              >
-                <li>
-                  <Link
-                    href="#"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    data absen
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
-                  >
-                    Scan QR
-                  </Link>
-                </li>
-              </ul>
-            </li> */}
           </ul>
         </div>
       </aside>

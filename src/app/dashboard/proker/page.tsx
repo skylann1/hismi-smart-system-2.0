@@ -13,36 +13,29 @@ const tableHeaders: TableHeader[] = [
   { key: "divisi", label: "Divisi Penanggung Jawab" },
   { key: "lokasi", label: "Lokasi" },
   { key: "status", label: "Status" },
-  { key: "tanggal_selesai", label: "Target Selesai" },
+  { key: "tanggal", label: "Tanggal" },
 ];
 
-type ProkerStatus = "Berjalan" | "Selesai" | "Direncanakan";
+type ProkerStatus = "Upcoming" | "Passed" | "Ongoing";
 
-const StatusBadge = ({ status }: { status: ProkerStatus }) => {
+const StatusBadge = ({ status }: { status: "Upcoming" | "Passed" | "Ongoing" }) => {
   const baseClasses = "px-3 py-1 text-xs font-medium rounded-full";
-
-  switch (status) {
-    case "Berjalan":
-      return (
-        <span className={`${baseClasses} bg-yellow-100 text-yellow-800`}>
-          Berjalan
-        </span>
-      );
-    case "Selesai":
-      return (
-        <span className={`${baseClasses} bg-green-100 text-green-800`}>
-          Selesai
-        </span>
-      );
-    case "Direncanakan":
-      return (
-        <span className={`${baseClasses} bg-gray-100 text-gray-800`}>
-          Direncanakan
-        </span>
-      );
-    default:
-      return null;
+  if (status === "Upcoming") {
+    return (
+      <span className={`${baseClasses} bg-blue-100 text-blue-800`}>
+        Upcoming
+      </span>
+    );
+  } else if (status === "Ongoing") {
+    return (
+      <span className={`${baseClasses} bg-yellow-100 text-yellow-800`}>
+        Ongoing
+      </span>
+    );
   }
+  return (
+    <span className={`${baseClasses} bg-gray-100 text-gray-800`}>Passed</span>
+  );
 };
 
 const DaftarProker = () => {
@@ -56,7 +49,7 @@ const DaftarProker = () => {
     divisi: string;
     lokasi: string;
     status: ProkerStatus;
-    tanggal_selesai: string;
+    tanggal: string;
     [key: string]: unknown;
   }
 
@@ -81,7 +74,7 @@ const DaftarProker = () => {
           divisi: item.divisi,
           lokasi: item.lokasi,
           status: <StatusBadge status={item.status} />,
-          tanggal_selesai: item.tanggal_selesai,
+          tanggal: item.tanggal,
         }));
         setProkers(formattedData);
       } catch (error) {

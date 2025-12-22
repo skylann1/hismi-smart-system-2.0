@@ -16,7 +16,7 @@ interface PrimaryTableProps {
   headers: TableHeader[];
   data: TableRow[];
   renderActions?: (row: TableRow) => React.ReactNode;
-  onAddClick?: () => void; // opsional button tambah
+  onAddClick?: () => void; 
 }
 
 const PrimaryTable: React.FC<PrimaryTableProps> = ({
@@ -28,7 +28,7 @@ const PrimaryTable: React.FC<PrimaryTableProps> = ({
   onAddClick,
 }) => {
   return (
-    <div className="shadow-md rounded-md sm:rounded-lg overflow-hidden h-screen bg-white">
+    <div className="shadow-md rounded-md sm:rounded-lg overflow-hidden min-h-screen bg-white">
       {/* Bagian Judul, Deskripsi, & Tombol Tambah */}
       <div className="p-5 text-lg text-left text-gray-900 font-bold flex justify-between items-end gap-4 bg-white">
         <div>

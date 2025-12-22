@@ -6,30 +6,48 @@ import InputText from "@/components/ui/moleculs/input/InputText";
 import InputDate from "@/components/ui/moleculs/input/InputDate";
 import RadioButtonGroup from "@/components/ui/moleculs/input/RadioButtonGroup";
 import { useState, useEffect } from "react";
+import InputTextArea from "@/components/ui/moleculs/input/InputArea";
+import { useAppDispatch } from "@/hooks/redux";
+import { alertIsAktif } from "@/features/alert/alertSlice";
+import { useRouter } from "next/navigation";
+import InputTime from "@/components/ui/moleculs/input/InputTime";
 
-// 1. Definisikan interface untuk data form kegiatan
 interface KegiatanFormData {
   judul: string;
   lokasi: string;
   divisi: string;
   tanggal: string;
-  status: "Akan Datang" | "Selesai";
+  maps: string;
+  status: "Upcoming" | "Passed" | "Ongoing";
+  deskripsi: string;
+  jamMulai: string;
+  jamSelesai: string;
 }
 
 export default function TambahKegiatanPage() {
-  // State untuk data form kegiatan, dimulai dengan nilai kosong
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const url = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/kegiatan/tambah`;
   const [formData, setFormData] = useState<KegiatanFormData>({
     judul: "",
     lokasi: "",
     divisi: "pendidikan",
     tanggal: "",
-    status: "Akan Datang",
+    status: "Ongoing",
+    maps: "",
+    deskripsi: "",
+    jamMulai: "",
+    jamSelesai: "",
   });
-  
+
   const [errors, setErrors] = useState({
     judul: { status: false, message: "" },
     lokasi: { status: false, message: "" },
     tanggal: { status: false, message: "" },
+    maps: { status: false, message: "" },
+    deskripsi: { status: false, message: "" },
+    jamMulai: { status: false, message: "" },
+    jamSelesai: { status: false, message: "" },
   });
 
   const [isFormValid, setIsFormValid] = useState(false);
@@ -38,13 +56,52 @@ export default function TambahKegiatanPage() {
     let error = { status: false, message: "" };
     switch (field) {
       case "judul":
-        if (!value.trim()) error = { status: true, message: "Judul wajib diisi" };
+        if (!value.trim())
+          error = { status: true, message: "Judul wajib diisi" };
         break;
       case "lokasi":
-        if (!value.trim()) error = { status: true, message: "Lokasi wajib diisi" };
+        if (!value.trim())
+          error = { status: true, message: "Lokasi wajib diisi" };
         break;
       case "tanggal":
-        if (!value) error = { status: true, message: "Tanggal pelaksanaan wajib diisi" };
+        if (!value)
+          error = { status: true, message: "Tanggal pelaksanaan wajib diisi" };
+        break;
+      case "maps":
+        if (value.trim()) {
+          try {
+            new URL(value);
+          } catch {
+            error = { status: true, message: "Link tidak valid" };
+          }
+        }
+        break;
+      case "jamMulai":
+        if (!value) error = { status: true, message: "Jam mulai wajib diisi" };
+        break;
+      case "jamSelesai":
+        if (!value) {
+          error = { status: true, message: "Jam selesai wajib diisi" };
+        } else if (formData.jamMulai && value <= formData.jamMulai) {
+          error = {
+            status: true,
+            message: "Jam selesai harus lebih dari jam mulai",
+          };
+        }
+        break;
+      case "deskripsi":
+        if (!value.trim())
+          error = { status: true, message: "Deskripsi wajib diisi" };
+        if (value.length > 500)
+          error = {
+            status: true,
+            message: "Deskripsi tidak boleh lebih dari 500 karakter",
+          };
+        if (value.length < 50)
+          error = {
+            status: true,
+            message: "Deskripsi minimal 50 karakter",
+          };
         break;
       default:
         break;
@@ -58,36 +115,78 @@ export default function TambahKegiatanPage() {
   };
 
   const divisiOptions = [
-      { value: "pendidikan", label: "Pendidikan" },
-      { value: "kominfo", label: "Kominfo" },
-      { value: "litbang", label: "Litbang" },
-      { value: "rsdm", label: "RSDM" },
-      { value: "bph", label: "BPH" },
+    { value: "pendidikan", label: "Pendidikan" },
+    { value: "kominfo", label: "Kominfo" },
+    { value: "litbang", label: "Litbang" },
+    { value: "rsdm", label: "RSDM" },
+    { value: "bph", label: "BPH" },
   ];
 
   const statusOptions = [
-    { value: "Akan Datang", label: "Akan Datang" },
-    { value: "Selesai", label: "Selesai" },
+    { value: "Upcoming", label: "Upcoming" },
+    { value: "Passed", label: "Passed" },
+    { value: "Ongoing", label: "Ongoing" },
   ];
 
   useEffect(() => {
-    const isErrorPresent = Object.values(errors).some(error => error.status);
-    const isDataMissing = !formData.judul || !formData.lokasi || !formData.tanggal;
+    const isErrorPresent = Object.values(errors).some((error) => error.status);
+    const isDataMissing =
+      !formData.judul || !formData.lokasi || !formData.tanggal;
     setIsFormValid(!isDataMissing && !isErrorPresent);
   }, [formData, errors]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isFormValid) {
-      console.log("Data kegiatan baru yang akan dikirim:", formData);
-      alert("Kegiatan baru berhasil ditambahkan!");
-      // Reset form setelah submit
+    try {
+      if (isFormValid) {
+        const submitData = async () => {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            dispatch(
+              alertIsAktif({
+                status: false,
+                title: "Error! Gagal menyimpan data ke sistem.",
+                message: data.message,
+              })
+            );
+            throw new Error("Network response was not ok");
+          }
+          dispatch(
+            alertIsAktif({
+              status: true,
+              title: "Success! Yes berhasil nih simpan data ke system.",
+              message: data.message,
+            })
+          );
+          router.push("/dashboard/kegiatan");
+        };
+
+        submitData();
+      } else {
+        alert("Masih ada data yang belum valid bro 🚫");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
       setFormData({
         judul: "",
         lokasi: "",
         divisi: "pendidikan",
         tanggal: "",
-        status: "Akan Datang",
+        status: "Ongoing",
+        maps: "",
+        deskripsi: "",
+        jamMulai: "",
+        jamSelesai: "",
       });
     }
   };
@@ -115,7 +214,10 @@ export default function TambahKegiatanPage() {
       </div>
 
       {/* Right Section (Form) */}
-      <form onSubmit={handleSubmit} className="w-full bg-white rounded-lg p-4 sm:p-6 shadow-lg">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full bg-white rounded-lg p-4 sm:p-6 shadow-lg"
+      >
         <h2 className="text-xl font-semibold text-gray-800">
           Form Tambah Kegiatan
         </h2>
@@ -129,8 +231,19 @@ export default function TambahKegiatanPage() {
             onChange={(e) => handleChange("judul", e.target.value)}
             isError={errors.judul}
           />
+          <InputTextArea
+            name="deskripsi"
+            label="*Deskripsi Kegiatan"
+            placeholder="Masukkan deskripsi kegiatan (maksimal 500 karakter, minimal 50 karakter)"
+            value={formData.deskripsi}
+            onChange={(e) => handleChange("deskripsi", e.target.value)}
+            isError={errors.deskripsi}
+            rows={5}
+          />
           <div className="flex flex-col gap-3">
-            <label className="text-sm font-medium text-gray-700">*Divisi Penyelenggara</label>
+            <label className="text-sm font-medium text-gray-700">
+              *Divisi Penyelenggara
+            </label>
             <RadioButtonGroup
               className="grid grid-cols-3 gap-2"
               options={divisiOptions}
@@ -148,6 +261,15 @@ export default function TambahKegiatanPage() {
             onChange={(e) => handleChange("lokasi", e.target.value)}
             isError={errors.lokasi}
           />
+          <InputText
+            label="*Maps (Google Maps URL)"
+            placeholder="Contoh: https://www.google.com/maps/place/..."
+            name="maps"
+            type="text"
+            value={formData.maps}
+            onChange={(e) => handleChange("maps", e.target.value)}
+            isError={errors.maps}
+          />
           <InputDate
             label="*Tanggal Pelaksanaan"
             onChange={(e) => handleChange("tanggal", e)}
@@ -155,6 +277,24 @@ export default function TambahKegiatanPage() {
             isError={errors.tanggal}
             disableFutureDates={false}
           />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InputTime
+              label="Jam Mulai"
+              name="jamMulai"
+              value={formData.jamMulai}
+              onChange={handleChange}
+              error={errors.jamMulai}
+              required
+            />
+            <InputTime
+              label="Jam Selesai"
+              name="jamSelesai"
+              value={formData.jamSelesai}
+              onChange={handleChange}
+              error={errors.jamSelesai}
+              required
+            />
+          </div>
           <div className="flex flex-col gap-3">
             <label className="text-sm font-medium text-gray-700">*Status</label>
             <RadioButtonGroup

@@ -9,6 +9,7 @@ import { useState, useEffect, use } from "react";
 import { useAppDispatch } from "@/hooks/redux";
 import { alertIsAktif } from "@/features/alert/alertSlice";
 import { useRouter } from "next/navigation";
+import InputTime from "@/components/ui/moleculs/input/InputTime";
 
 interface PertemuanFormData {
   judul: string;
@@ -19,6 +20,8 @@ interface PertemuanFormData {
   metode: "Offline" | "Online";
   penanggungJawab?: string;
   nomerPenanggungJawab?: string;
+  jamMulai: string;
+  jamSelesai: string;
 }
 
 export default function EditPertemuanPage({
@@ -38,6 +41,8 @@ export default function EditPertemuanPage({
     metode: "Offline",
     penanggungJawab: "",
     nomerPenanggungJawab: "",
+    jamMulai: "",
+    jamSelesai: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -49,6 +54,8 @@ export default function EditPertemuanPage({
     penanggungJawab: { status: false, message: "" },
     nomerPenanggungJawab: { status: false, message: "" },
     maps: { status: false, message: "" },
+    jamMulai: { status: false, message: "" },
+    jamSelesai: { status: false, message: "" },
   });
 
   const [isFormValid, setIsFormValid] = useState(false);
@@ -80,7 +87,19 @@ export default function EditPertemuanPage({
       case "tanggal":
         if (!value) error = { status: true, message: "Tanggal wajib diisi" };
         break;
-
+      case "jamMulai":
+        if (!value) error = { status: true, message: "Jam mulai wajib diisi" };
+        break;
+      case "jamSelesai":
+        if (!value) {
+          error = { status: true, message: "Jam selesai wajib diisi" };
+        } else if (formData.jamMulai && value <= formData.jamMulai) {
+          error = {
+            status: true,
+            message: "Jam selesai harus lebih dari jam mulai",
+          };
+        }
+        break;
       case "penanggungJawab":
         if (!value.trim())
           error = { status: true, message: "Penanggung jawab wajib diisi" };
@@ -152,7 +171,6 @@ export default function EditPertemuanPage({
         const data = json.data;
 
         if (!response.ok) throw new Error("Failed to fetch data");
-
         setFormData({
           judul: data.judul || "",
           lokasi: data.lokasi || "",
@@ -162,6 +180,8 @@ export default function EditPertemuanPage({
           metode: data.metode || "Offline",
           penanggungJawab: data.penanggungJawab || "",
           nomerPenanggungJawab: data.nomerPenanggungJawab || "",
+          jamMulai: data.jamMulai || "",
+          jamSelesai: data.jamSelesai || "",
         });
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -223,6 +243,8 @@ export default function EditPertemuanPage({
         metode: "Offline",
         penanggungJawab: "",
         nomerPenanggungJawab: "",
+        jamMulai: "",
+        jamSelesai: "",
       });
     }
   };
@@ -309,6 +331,25 @@ export default function EditPertemuanPage({
               isError={errors.tanggal}
               disableFutureDates={false}
             />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InputTime
+                label="Jam Mulai"
+                name="jamMulai"
+                value={formData.jamMulai}
+                onChange={handleChange}
+                error={errors.jamMulai}
+                required
+              />
+              <InputTime
+                label="Jam Selesai"
+                name="jamSelesai"
+                value={formData.jamSelesai}
+                onChange={handleChange}
+                error={errors.jamSelesai}
+                required
+              />
+            </div>
+
             <div className="flex flex-col gap-3">
               <label className="text-sm font-medium text-gray-700">
                 *Status

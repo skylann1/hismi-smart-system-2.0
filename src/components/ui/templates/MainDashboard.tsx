@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
@@ -12,9 +13,54 @@ import { FaCartArrowDown, FaCartPlus } from "react-icons/fa";
 import { inter } from "@/app/fonts";
 import Image from "next/image";
 import { useAppSelector } from "@/hooks/redux";
+import { useState, useEffect } from "react";
 
 const MainDashboard = () => {
   const { user } = useAppSelector((state) => state);
+  const [anggota, setAnggota] = useState([]);
+  const [acara, setAcara] = useState([]);
+  const [kegiatan, setKegiatan] = useState([]);
+  const [allKegiatan, setAllKegiatan] = useState([]);
+
+  useEffect(() => {
+    const fetchAnggota = async () => {
+      try {
+        const [resAnggota, resAcara, resKegiatan, resAllKegiatan] =
+          await Promise.all([
+            fetch("/dashboard/api/anggota"),
+            fetch("/dashboard/api/proker"),
+            fetch("/dashboard/api/kegiatan"),
+            fetch("/dashboard/api/acara"),
+          ]);
+
+        const [anggotaJson, acaraJson, kegiatanJson, allKegiatanJson] =
+          await Promise.all([
+            resAnggota.json(),
+            resAcara.json(),
+            resKegiatan.json(),
+            resAllKegiatan.json(),
+          ]);
+
+        setAnggota(anggotaJson.data);
+        setAcara(acaraJson.data);
+        setKegiatan(kegiatanJson.data);
+        setAllKegiatan(allKegiatanJson.data);
+      } catch {
+        console.error("Oops something when wrong in the server.");
+      }
+    };
+
+    fetchAnggota();
+  }, []);
+
+  const latestEvent = allKegiatan.reduce((latest: any, current: any) => {
+    if (!latest) return current;
+
+    return new Date(current.tanggal).getTime() >
+      new Date(latest.tanggal).getTime()
+      ? current
+      : latest;
+  }, null);
 
   return (
     <div>
@@ -22,7 +68,7 @@ const MainDashboard = () => {
         <div className="w-full flex flex-col md:flex-row rounded-xl bg-gradient-to-b from-violet-500 to-violet-900  px-4 md:px-8 pt-8 gap-16">
           <div className="w-full flex flex-col justify-start items-start text-white md:mb-6">
             <h1 className="text-3xl drop-shadow-xl uppercase font-bold">
-              SELAMAT DATANG, <span>{user?.nama}</span>
+              SELAMAT DATANG, <span>{user.nama || "Sobat HIMSI"}</span>
             </h1>
             <span className=" text-sm opacity-90 font-semibold">
               HIMSI SMART SYSTEM
@@ -55,8 +101,10 @@ const MainDashboard = () => {
               <IoChatbubblesSharp className="text-4xl" />
             </div>
             <div className="flex flex-col min-h-full justify-between items-start py-1">
-              <h3 className=" text-base opacity-90 font-semibold">Pertemuan</h3>
-              <span className=" text-base opacity-90 font-semibold">3</span>
+              <h3 className=" text-base opacity-90 font-semibold">Kegiatan</h3>
+              <span className=" text-base opacity-90 font-semibold">
+                {kegiatan.length}
+              </span>
             </div>
           </div>
           <div className="w-full md:w-[30%] p-2 flex gap-3 bg-white rounded-lg shadow border border-gray-300">
@@ -65,7 +113,9 @@ const MainDashboard = () => {
             </div>
             <div className="flex flex-col min-h-full justify-between items-start py-1">
               <h3 className="text-base opacity-90 font-semibold">Acara</h3>
-              <span className=" text-base opacity-90 font-semibold">1</span>
+              <span className=" text-base opacity-90 font-semibold">
+                {acara.length}
+              </span>
             </div>
           </div>
           <div className="w-full md:w-[30%] p-2 flex gap-3 bg-white rounded-lg shadow border border-gray-300">
@@ -74,7 +124,9 @@ const MainDashboard = () => {
             </div>
             <div className="flex flex-col min-h-full justify-between items-start py-1">
               <h3 className=" text-base opacity-90 font-semibold">Anggota</h3>
-              <span className=" text-base opacity-90 font-semibold">54</span>
+              <span className=" text-base opacity-90 font-semibold">
+                {anggota.length}
+              </span>
             </div>
           </div>
         </div>
@@ -87,7 +139,7 @@ const MainDashboard = () => {
               </span>
             </div>
             <div className="flex flex-col gap-4 h-full p-4 overflow-y-auto">
-              <div className="w-full hover:bg-gray-100 transition-all ease-in-out duration-300 rounded-md flex justify-between items-start p-2">
+              {/* <div className="w-full hover:bg-gray-100 transition-all ease-in-out duration-300 rounded-md flex justify-between items-start p-2">
                 <div className="flex gap-2">
                   <div className="w-16 h-16 bg-red-700 flex justify-center items-center rounded-md">
                     <FaCartArrowDown className="text-2xl text-white" />
@@ -122,11 +174,17 @@ const MainDashboard = () => {
                     Rp 250,000
                   </span>
                 </div>
+              </div> */}
+              <div className="w-full h-full flex justify-center items-center">
+                <span className="text-sm font-medium opacity-80 text-center">
+                  Cooming soon ya man teman, butuh liburan cape ngoding mulu....
+                </span>
               </div>
             </div>
           </div>
-          <div className="w-full md:w-[60%] rounded-lg h-fit md:h-[26rem] bg-primary border border-gray-300 flex flex-col overflow-hidden justify-center items-center px-4 py-10 text-white gap-8 md:gap-16">
-            <div className="flex flex-col justify-center items-center">
+
+          <div className="w-full md:w-[60%] rounded-lg h-fit md:h-[26rem] min-h-60 bg-primary border border-gray-300 flex flex-col overflow-hidden justify-center items-center px-4 py-10 text-white gap-8 md:gap-16">
+            {/* <div className="flex flex-col justify-center items-center">
               <span className="text-4xl font-semibold">8</span>
               <span className="text-xs opacity-80 font-medium">
                 BULAN TAGIHAN KAS
@@ -136,6 +194,11 @@ const MainDashboard = () => {
               <span className="text-3xl font-semibold">Rp. 80,000</span>
               <span className="text-xs opacity-80 font-medium">
                 TOTAL YANG HARUS DI BAYAR
+              </span>
+            </div> */}
+            <div className="w-full h-full flex justify-center items-center">
+              <span className="text-sm font-medium opacity-80 text-center">
+                Ini juga sama cooming soon yaaa....
               </span>
             </div>
           </div>
@@ -162,20 +225,35 @@ const MainDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="">
-                  <tr className="odd:bg-white even:bg-gray-50 border-b border-gray-200">
-                    <th
-                      scope="row"
-                      className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
-                    >
-                      1
-                    </th>
-                    <td className="px-6 py-4">Sahlan</td>
-                    <td className="px-6 py-4">Pendidikan</td>
-                  </tr>
+                  {anggota.slice(0, 5).map(
+                    (
+                      anggotaItem: {
+                        id: string;
+                        nama: string;
+                        divisi: string;
+                      },
+                      index
+                    ) => (
+                      <tr
+                        key={anggotaItem.id}
+                        className="odd:bg-white even:bg-gray-50 border-b border-gray-200"
+                      >
+                        <th
+                          scope="row"
+                          className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
+                        >
+                          {index + 1}
+                        </th>
+                        <td className="px-6 py-4">{anggotaItem.nama}</td>
+                        <td className="px-6 py-4">{anggotaItem.divisi}</td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
+          
           <div className="w-full md:w-[30%] h-full">
             <div className="w-full h-fit md:h-1/2 bg-white border border-gray-300 rounded-xl flex flex-col justify-start items-center shadow">
               <div className="w-full border-b border-gray-300 p-4 md:p-3 flex justify-start items-center gap-2">
@@ -183,14 +261,16 @@ const MainDashboard = () => {
                   <IoCalendarNumberSharp className="text-lg text-sky-500 drop-shadow-2xl" />
                 </div>
                 <span className="font-semibold text-sm opacity-90">
-                  Upcoming <span className="opacity-70 text-xs">•</span> Rapat
+                  Upcoming <span className="opacity-70 text-xs">•</span>{" "}
+                  {latestEvent?.type || "No Event"}
                 </span>
               </div>
               <div className="flex flex-col px-4 md:px-3 w-full">
                 <div className=" text-sm opacity-90 border-b border-gray-300 py-4 w-full flex justify-start items-center gap-2">
                   <IoTimeSharp className="text-xl text-blue-900 " />
                   <span className="font-medium text-sm opacity-95">
-                    10 Mar 2025, 15:17 - 18:30
+                    {latestEvent?.tanggal}, {latestEvent?.jamMulai} -{" "}
+                    {latestEvent?.jamSelesai}
                   </span>
                 </div>
                 <div className="flex flex-col flex-grow gap-2 pt-4 pb-4 justify-center items-start">
@@ -199,7 +279,7 @@ const MainDashboard = () => {
                       <IoLocation className="text-lg text-red-600" />
                     </div>
                     <span className="font-medium text-xs opacity-95">
-                      Warmindo 4 sekawan wisma asri
+                      {latestEvent?.lokasi || "Lokasi belum di tentukan"}
                     </span>
                   </span>
                   <span className="flex gap-1 justify-center items-center p-1 bg-gray-100 rounded-md">
@@ -207,7 +287,8 @@ const MainDashboard = () => {
                       <div className="ml-1 w-[10px] h-[10px] rounded-full bg-green-400"></div>
                     </div>
                     <span className="font-medium text-xs opacity-70">
-                      Pembahasan santunan yatim
+                      Pembahasan{" "}
+                      {latestEvent?.judul || "Judul belum di tentukan"}
                     </span>
                   </span>
                 </div>

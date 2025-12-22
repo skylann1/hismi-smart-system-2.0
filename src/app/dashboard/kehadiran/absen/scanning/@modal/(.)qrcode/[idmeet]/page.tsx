@@ -10,7 +10,7 @@ import { FaSquarePhone } from "react-icons/fa6";
 import { IoMdMail } from "react-icons/io";
 import { IoPersonCircleSharp } from "react-icons/io5";
 import CardActionStatus from "@/components/ui/templates/modal/CardActionStatus";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 type ScanStatus = "idle" | "starting" | "scanning" | "stopping" | "error";
 interface statusAbsen {
@@ -18,25 +18,44 @@ interface statusAbsen {
   message: string;
 }
 
+interface Data {
+  id: string;
+  nim: string;
+  nama: string;
+  email: string;
+  no_hp: string;
+  status: string;
+  divisi: string;
+  role: string;
+  imageUrl: string;
+}
+
 export default function ModalScanQRCode() {
+  const { tipe, idmeet } = useParams();
+  console.log("id meet is", idmeet);
+  console.log(idmeet, tipe);
   const router = useRouter();
 
   const handleCLickClose = () => {
     router.back();
-  }
+  };
 
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [cameras, setCameras] = useState<CameraDevice[]>([]);
   const [selectedCamera, setSelectedCamera] = useState<string | null>(null);
   const [onProsses, setOnProsses] = useState(false);
   const [prossesIsDone, setProssesIsDone] = useState<boolean>(false);
+  const [data, setData] = useState<Data>();
   const [statusAbsen, setStatusAbsen] = useState<statusAbsen>({
     status: false,
     message: "",
   });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [status, setStatus] = useState<ScanStatus>("idle");
   const [scanResult, setScanResult] = useState<string | null>(null);
+  console.log(scanResult);
+  console.log(data);
   const [errMsg, setErrMsg] = useState<string | null>(null);
 
   const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -141,7 +160,6 @@ export default function ModalScanQRCode() {
     }
   };
 
-  // --- Load cameras
   useEffect(() => {
     if (!isScriptLoaded || !(window as any).Html5Qrcode) return;
 
@@ -162,6 +180,29 @@ export default function ModalScanQRCode() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isScriptLoaded]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(
+          `/dashboard/api/kehadiran/anggota?id=${tipe}&tipe=${idmeet}&nim=${scanResult}`,
+          {
+            cache: "no-store",
+          }
+        );
+
+        if (!res.ok) {
+          alert("Oops maaf nih, lagi ada trouble silahkan coba lagi nanti.");
+        }
+        const data = await res.json();
+        setData(data.data);
+      } catch {
+        console.error("Oops! something wrong in when u try to fetch");
+      }
+    };
+
+    if (scanResult) fetchData();
+  }, [scanResult]);
 
   const onAbsenSubmit = () => {
     setOnProsses(true);
@@ -259,7 +300,7 @@ export default function ModalScanQRCode() {
                   {status === "idle" && (
                     <>
                       <p className="text-xs text-gray-500 mt-2">
-                        Tekan <b>Start Scanning</b> untuk membuka kamera.
+                        Tekan tombol <b>Start Scanning</b> untuk membuka kamera.
                       </p>
                       <p className="text-xs text-gray-500 mt-2">
                         Jika tombol start tidak bisa digunakan silahkan refresh.
@@ -270,61 +311,107 @@ export default function ModalScanQRCode() {
               </>
             ) : (
               <div className="flex gap-16 justify-center items-stretch">
-                <div className="flex flex-col w-72 lg:w-64 justify-start items-start gap-0">
-                  <div className="w-full bg-stone-200 h-44 rounded-t-lg relative">
-                    <Image
-                      className="w-[60%] object-center object-cover absolute mx-auto left-0 right-0 top-11"
-                      src="/assets/static-img/sahlan.jpg"
-                      alt="Scan Success"
-                      width={1000}
-                      height={1000}
-                    />
-                  </div>
-                  <div className="mt-16 lg-mt-10 text-start w-full">
-                    <span>
-                      <h3 className="text-base font-semibold text-gray-800">
-                        Sahlan muzaqi
-                      </h3>
-                      <p className="text-xs text-gray-600">
-                        koordinator divisi Pendidikan
-                      </p>
-                    </span>
-                    <div className="grid grid-cols-[65%_35%] gap-2 w-full mt-4 text-gray-700">
-                      <div className="rounded-lg border border-gray-300/80 p-1 text-center text-sm bg-red-600 text-white font-medium">
-                        tidak hadir
+                {isLoading ? (
+                  <div className="flex flex-col w-72 lg:w-64 justify-start items-start gap-0 animate-pulse">
+                    {/* Gambar skeleton */}
+                    <div className="w-full bg-stone-200 h-44 rounded-t-lg relative">
+                      <div className="absolute top-11 left-0 right-0 mx-auto w-[60%] h-24 bg-gray-300 rounded-md" />
+                    </div>
+
+                    {/* Nama dan divisi */}
+                    <div className="mt-16 text-start w-full">
+                      <div className="h-4 bg-gray-300 rounded w-2/3 mb-2" />
+                      <div className="h-3 bg-gray-200 rounded w-1/2" />
+
+                      {/* Status */}
+                      <div className="grid grid-cols-[65%_35%] gap-2 w-full mt-4">
+                        <div className="h-6 bg-gray-300 rounded-lg" />
+                        <div className="h-6 bg-gray-300 rounded-lg" />
                       </div>
-                      <div className="rounded-lg border border-gray-300/80 p-1 text-center text-sm bg-green-600 text-white font-medium">
-                        aktif
+
+                      {/* Info kontak */}
+                      <div className="mt-4 flex flex-col gap-2">
+                        <div className="h-3 bg-gray-200 rounded w-3/4" />
+                        <div className="h-3 bg-gray-200 rounded w-2/3" />
+                        <div className="h-3 bg-gray-200 rounded w-5/6" />
                       </div>
                     </div>
-                    <div className="mt-4 flex flex-col gap-1.5">
-                      <span className="text-xs text-gray-600 flex items-center gap-2 font-medium">
-                        <IoPersonCircleSharp className="text-lg" />
-                        19230802
-                      </span>
-                      <span className="text-xs text-gray-600 flex items-center gap-2 font-medium">
-                        <FaSquarePhone className="text-lg" />
-                        08123456789
-                      </span>
-                      <span className="text-xs text-gray-600 flex items-center gap-2 font-medium">
-                        <IoMdMail className="text-lg" />
-                        sahlan@example.com
-                      </span>
+
+                    {/* Tombol skeleton */}
+                    <div className="flex justify-end lg:hidden w-full mt-12">
+                      <div className="px-3 py-2 bg-gray-300 rounded-md w-28 h-8" />
                     </div>
                   </div>
-                  <div className="flex justify-end lg:hidden w-full mt-12">
-                    <button
-                      className="px-3 py-1 bg-indigo-500 text-white rounded-md text-sm font-semibold cursor-pointer flex gap-2 items-center disabled:opacity-80"
-                      onClick={onAbsenSubmit}
-                      disabled={onProsses}
-                    >
-                      Selanjutnya
-                      {onProsses && (
-                        <div className="w-4 h-4 border-3 border-sky-300 border-t-transparent border-solid rounded-full animate-spin"></div>
+                ) : (
+                  <div className="flex flex-col w-72 lg:w-64 justify-start items-start gap-0">
+                    <div className="w-full bg-stone-200 h-44 rounded-t-lg relative">
+                      {data?.imageUrl ? (
+                        <Image
+                          className="w-[60%] object-center object-cover absolute mx-auto left-0 right-0 top-4"
+                          src={data.imageUrl}
+                          alt="Scan Success"
+                          width={1000}
+                          height={1000}
+                        />
+                      ) : (
+                        <Image
+                          className="w-[60%] object-center object-cover absolute mx-auto left-0 right-0 top-11"
+                          src="/assets/undraw/social-bio.svg"
+                          alt="Placeholder"
+                          width={1000}
+                          height={1000}
+                        />
                       )}
-                    </button>
+                    </div>
+                    <div className="mt-16 lg-mt-10 text-start w-full">
+                      <span>
+                        <h3 className="text-base font-semibold text-gray-800">
+                          {data?.nama}
+                        </h3>
+                        <p className="text-xs text-gray-600">
+                          {data?.divisi}, {data?.role}
+                        </p>
+                      </span>
+                      <div className="grid grid-cols-[65%_35%] gap-2 w-full mt-4 text-gray-700">
+                        <div className="rounded-lg border border-gray-300/80 p-1 text-center text-sm bg-gray-100 text-gray-700 font-medium">
+                          {data?.status}
+                        </div>
+                        <div className="rounded-lg border border-gray-300/80 p-1 text-center text-sm bg-green-600 text-white font-medium">
+                          aktif
+                        </div>
+                      </div>
+                      <div className="mt-4 flex flex-col gap-1.5">
+                        <span className="text-xs text-gray-600 flex items-center gap-2 font-medium">
+                          <IoPersonCircleSharp className="text-lg" />
+                          {data?.nim}
+                        </span>
+                        <span className="text-xs text-gray-600 flex items-center gap-2 font-medium">
+                          <FaSquarePhone className="text-lg" />
+                          {data?.no_hp}
+                        </span>
+                        <span className="text-xs text-gray-600 flex items-center gap-2 font-medium">
+                          <IoMdMail className="text-lg" />
+                          {data?.email}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex justify-end lg:hidden w-full mt-12">
+                      <button
+                        className={`px-3 py-1 bg-indigo-500 text-white rounded-md text-sm font-semibold cursor-pointer flex gap-2 items-center disabled:opacity-80 ${
+                          data?.status === "hadir" &&
+                          "cursor-not-allowed bg-red-500 "
+                        }`}
+                        onClick={onAbsenSubmit}
+                        disabled={onProsses || data?.status === "hadir"}
+                      >
+                        {data?.status === "hadir" ? "Sudah hadir" : "hadir"}
+                        {onProsses && (
+                          <div className="w-4 h-4 border-3 border-sky-300 border-t-transparent border-solid rounded-full animate-spin"></div>
+                        )}
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* section right */}
                 <div className="hidden lg:flex flex-col justify-between items-start w-64 gap-6">
@@ -347,11 +434,14 @@ export default function ModalScanQRCode() {
                   </div>
                   <div className="w-full flex items-center justify-end mt-10">
                     <button
-                      className="px-3 py-1 bg-indigo-500 text-white rounded-md text-sm font-semibold cursor-pointer flex gap-2 items-center disabled:opacity-80"
+                      className={`px-3 py-1 bg-indigo-500 text-white rounded-md text-sm font-semibold cursor-pointer flex gap-2 items-center disabled:opacity-80 ${
+                        data?.status === "hadir" &&
+                        "cursor-not-allowed bg-red-500 "
+                      }`}
                       onClick={onAbsenSubmit}
-                      disabled={onProsses}
+                      disabled={onProsses || data?.status === "hadir"}
                     >
-                      Selanjutnya
+                      {data?.status === "hadir" ? "Sudah hadir" : "hadir"}
                       {onProsses && (
                         <div className="w-4 h-4 border-3 border-sky-300 border-t-transparent border-solid rounded-full animate-spin"></div>
                       )}

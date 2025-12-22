@@ -1,11 +1,15 @@
+"use client";
+
 import ReusableTable, {
   type TableHeader,
   type TableRow,
-} from "@/components/ui/moleculs/table/PrimaryTable"; 
+} from "@/components/ui/moleculs/table/PrimaryTable";
 import Link from "next/link";
+import LoadingTableComponent from "@/components/ui/moleculs/LoadingTableComponent";
+import { useState, useEffect } from "react";
 
 const tableHeaders: TableHeader[] = [
-  { key: "title", label: "Nama Kegiatan" },
+  { key: "judul", label: "Nama Kegiatan" },
   { key: "divisi", label: "Divisi Penyelenggara" },
   { key: "lokasi", label: "Lokasi" },
   { key: "status", label: "Status" },
@@ -13,72 +17,96 @@ const tableHeaders: TableHeader[] = [
 ];
 
 // Tipe data baru untuk status kegiatan
-type KegiatanStatus = "Upcoming" | "Passed";
+type KegiatanStatus = "Upcoming" | "Passed" | "Ongoing";
 
-const StatusBadge = ({ status }: { status: KegiatanStatus }) => {
+const StatusBadge = ({ status }: { status: "Upcoming" | "Passed" | "Ongoing" }) => {
   const baseClasses = "px-3 py-1 text-xs font-medium rounded-full";
-  
-  switch (status) {
-    case "Upcoming":
-      return <span className={`${baseClasses} bg-blue-100 text-blue-800`}>Upcoming</span>;
-    case "Passed":
-      return <span className={`${baseClasses} bg-green-100 text-green-800`}>Passed</span>;
-    default:
-      return null;
+  if (status === "Upcoming") {
+    return (
+      <span className={`${baseClasses} bg-blue-100 text-blue-800`}>
+        Upcoming
+      </span>
+    );
+  } else if (status === "Ongoing") {
+    return (
+      <span className={`${baseClasses} bg-yellow-100 text-yellow-800`}>
+        Ongoing
+      </span>
+    );
   }
+  return (
+    <span className={`${baseClasses} bg-gray-100 text-gray-800`}>Passed</span>
+  );
 };
 
-const kegiatanData: TableRow[] = [
-  {
-    id: "keg-01",
-    title: "Workshop Desain Grafis dengan Canva",
-    divisi: "Kominfo",
-    lokasi: "Laboratorium Komputer",
-    status: <StatusBadge status="Upcoming" />,
-    tanggal: "15 September 2025",
-  },
-  {
-    id: "keg-02",
-    title: "Pengabdian Masyarakat: Pelatihan Office",
-    divisi: "Pendidikan",
-    lokasi: "SMK Harapan Bangsa",
-    status: <StatusBadge status="Passed" />,
-    tanggal: "20 Juli 2025",
-  },
-  {
-    id: "keg-03",
-    title: "Turnamen E-Sports Internal",
-    divisi: "RSDM",
-    lokasi: "Online",
-    status: <StatusBadge status="Upcoming" />,
-    tanggal: "5 Agustus 2025",
-  },
-  {
-    id: "keg-04",
-    title: "Diskusi Panel: Karir di Bidang IT",
-    divisi: "Litbang",
-    lokasi: "Aula Kampus",
-    status: <StatusBadge status="Passed" />,
-    tanggal: "10 Oktober 2025",
-  },
-];
 
 const DaftarKegiatan = () => {
+  const url = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/kegiatan`;
+  const [isLoading, setIsLoading] = useState(true);
+  const [kegiatans, setKegiatans] = useState<TableRow[]>([]);
+
+  type Kegiatan = {
+    id: string;
+    judul: string;
+    divisi: string;
+    lokasi: string;
+    status: KegiatanStatus;
+    tanggal: string;
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          cache: "no-store",
+        });
+        const result = await response.json();
+        if (!result.success) {
+          throw new Error(result.message || "Failed to fetch kegiatan data");
+        }
+        const rawData = result.data as Kegiatan[];
+        const formattedData = rawData.map((item) => ({
+          id: item.id,
+          judul: item.judul,
+          divisi: item.divisi,
+          lokasi: item.lokasi,
+          status: <StatusBadge status={item.status} />,
+          tanggal: item.tanggal,
+        }));
+        setKegiatans(formattedData);
+      } catch (error) {
+        console.error("Error fetching kegiatan data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
   return (
-    <ReusableTable
-      title="Daftar Kegiatan HIMSI"
-      description="Semua kegiatan yang telah dan akan diselenggarakan oleh HIMSI UBSI KLA dalam satu periode."
-      headers={tableHeaders}
-      data={kegiatanData}
-      renderActions={(kegiatan) => (
-        <Link
-          href={`kegiatan/edit/${kegiatan.id}`} // Arahkan ke halaman edit kegiatan
-          className="font-medium text-blue-600 hover:underline"
-        >
-          Edit
-        </Link>
+    <>
+      {isLoading ? (
+        <LoadingTableComponent />
+      ) : (
+        <ReusableTable
+          title="Daftar Kegiatan HIMSI"
+          description="Semua kegiatan yang telah dan akan diselenggarakan oleh HIMSI UBSI KLA dalam satu periode."
+          headers={tableHeaders}
+          data={kegiatans}
+          renderActions={(kegiatan) => (
+            <Link
+              href={`kegiatan/edit/${kegiatan.id}`} // Arahkan ke halaman edit kegiatan
+              className="font-medium text-blue-600 hover:underline"
+            >
+              Edit
+            </Link>
+          )}
+        />
       )}
-    />
+    </>
   );
 };
 

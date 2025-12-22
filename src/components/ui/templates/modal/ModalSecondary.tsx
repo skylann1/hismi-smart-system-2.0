@@ -33,7 +33,7 @@ export default function ModalSecondary({
         {children}
         <div className="absolute right-1 top-1 cursor-pointer">
           <RiCloseCircleFill
-            className="text-3xl text-black"
+            className="text-3xl text-black/80 hover:text-black/100 transition"
             onClick={handleXClick}
           />
         </div>
