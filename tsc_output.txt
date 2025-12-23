@@ -1,0 +1,41 @@
+src/app/api/bph/route.ts(7,34): error TS2339: Property 'data' does not exist on type '{ success: false; message: string; } | { success: true; data: unknown; }'.
+  Property 'data' does not exist on type '{ success: false; message: string; }'.
+src/app/dashboard/api/publikasi/bph/edit/route.ts(12,29): error TS2339: Property 'images' does not exist on type '{}'.
+src/app/dashboard/api/publikasi/bph/edit/route.ts(41,9): error TS2322: Type 'string | undefined' is not assignable to type 'string | null'.
+  Type 'undefined' is not assignable to type 'string | null'.
+src/app/dashboard/api/publikasi/bph/edit/route.ts(54,45): error TS2345: Argument of type '{ images: Record<string, string | null>; }' is not assignable to parameter of type 'Partial<DivisiSettingsType>'.
+  Types of property 'images' are incompatible.
+    Type 'Record<string, string | null>' is missing the following properties from type '{ image1: string | File | null; image2: string | File | null; image3: string | File | null; image4: string | File | null; image5: string | File | null; }': image1, image2, image3, image4, image5
+src/app/dashboard/api/publikasi/bph/route.ts(7,34): error TS2339: Property 'data' does not exist on type '{ success: false; message: string; } | { success: true; data: unknown; }'.
+  Property 'data' does not exist on type '{ success: false; message: string; }'.
+src/app/dashboard/api/publikasi/divisi/[divisi]/edit/route.ts(16,35): error TS2339: Property 'images' does not exist on type '{}'.
+src/app/dashboard/api/publikasi/divisi/[divisi]/edit/route.ts(62,21): error TS2322: Type 'string | undefined' is not assignable to type 'string | null'.
+  Type 'undefined' is not assignable to type 'string | null'.
+src/app/dashboard/pemilu/information/page.tsx(39,27): error TS2339: Property 'id' does not exist on type 'PaslonType'.
+src/app/dashboard/pemilu/information/page.tsx(89,27): error TS2339: Property 'id' does not exist on type 'PaslonType'.
+src/app/dashboard/pemilu/information/page.tsx(177,61): error TS2339: Property 'id' does not exist on type 'PaslonType'.
+src/app/dashboard/pemilu/information/page.tsx(179,43): error TS2339: Property 'id' does not exist on type 'PaslonType'.
+src/app/dashboard/pemilu/information/page.tsx(187,42): error TS2339: Property 'id' does not exist on type 'PaslonType'.
+src/app/dashboard/pemilu/information/page.tsx(196,38): error TS2339: Property 'id' does not exist on type 'PaslonType'.
+src/app/dashboard/pemilu/information/page.tsx(208,38): error TS2339: Property 'id' does not exist on type 'PaslonType'.
+src/app/dashboard/pemilu/information/page.tsx(233,38): error TS2339: Property 'id' does not exist on type 'PaslonType'.
+src/app/dashboard/pemilu/votes/page.tsx(27,24): error TS2339: Property 'id' does not exist on type '{ name?: string | null | undefined; email?: string | null | undefined; image?: string | null | undefined; }'.
+src/app/dashboard/pemilu/votes/page.tsx(80,39): error TS2339: Property 'id' does not exist on type 'PaslonType'.
+src/app/dashboard/pemilu/votes/page.tsx(200,27): error TS2339: Property 'id' does not exist on type 'PaslonType'.
+src/app/dashboard/settings/pemilu/kandidat/edit/[id]/page.tsx(101,29): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(name: string, value: string | Blob): void', gave the following error.
+    Argument of type 'ParamValue' is not assignable to parameter of type 'string | Blob'.
+      Type 'undefined' is not assignable to type 'string | Blob'.
+  Overload 2 of 3, '(name: string, value: string): void', gave the following error.
+    Argument of type 'ParamValue' is not assignable to parameter of type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+  Overload 3 of 3, '(name: string, blobValue: Blob, filename?: string | undefined): void', gave the following error.
+    Argument of type 'ParamValue' is not assignable to parameter of type 'Blob'.
+      Type 'undefined' is not assignable to type 'Blob'.
+src/app/dashboard/settings/pemilu/kandidat/page.tsx(70,57): error TS2339: Property 'id' does not exist on type 'PaslonType'.
+src/app/dashboard/settings/pemilu/kandidat/page.tsx(125,33): error TS2339: Property 'id' does not exist on type 'PaslonType'.
+src/app/dashboard/settings/pemilu/kandidat/page.tsx(178,82): error TS2339: Property 'id' does not exist on type 'PaslonType'.
+src/app/dashboard/settings/pemilu/kandidat/page.tsx(185,60): error TS2339: Property 'id' does not exist on type 'PaslonType'.
+src/app/dashboard/settings/pemilu/stats/page.tsx(66,23): error TS2322: Type '{ children: Element; title: string; }' is not assignable to type 'IntrinsicAttributes & DashboardSectionProps'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & DashboardSectionProps'.
+src/features/user/userSlice.ts(6,7): error TS2741: Property 'imageUrl' is missing in type '{ id: string; nama: string; email: string; tanggal_lahir: string; no_hp: string; nim: string; jenjang_pendidikan: string; semester: number; tipe_kelas: string; tahun_masuk: string; divisi: string; role: string; image: string; access: never[]; }' but required in type 'UserType'.

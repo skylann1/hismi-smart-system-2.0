@@ -20,17 +20,18 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ success: false, message: "Data tidak ditemukan" }, { status: 404 });
     }
 
-    const data = existing.data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = existing.data as any;
 
     // 3. Hapus Foto Ketua di Supabase (Kalau ada)
     // Asumsi: data.ketua.foto menyimpan Full URL
     if (data.ketua?.foto) {
-       await deleteImage(data.ketua.foto, "images"); // "images" adalah nama bucket lu
+      await deleteImage(data.ketua.foto, "images"); // "images" adalah nama bucket lu
     }
 
     // 4. Hapus Foto Wakil di Supabase (Kalau ada)
     if (data.wakil?.foto) {
-       await deleteImage(data.wakil.foto, "images");
+      await deleteImage(data.wakil.foto, "images");
     }
 
     // 5. Hapus Data di Firestore

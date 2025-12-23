@@ -98,7 +98,7 @@ export default function EditPage() {
     try {
       const formData = new FormData();
       // Penting: Kirim ID biar backend tau siapa yg diupdate
-      formData.append("id", params.id);
+      formData.append("id", params.id as string);
 
       // Append Text Fields
       formData.append("nomor_urut", form.nomor_urut);
@@ -404,9 +404,8 @@ export default function EditPage() {
           <button
             disabled={isSaving}
             type="submit"
-            className={`bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition ${
-              isSaving ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition ${isSaving ? "opacity-50 cursor-not-allowed" : ""
+              }`}
           >
             {isSaving ? "Menyimpan Perubahan..." : "Update Paslon"}
           </button>

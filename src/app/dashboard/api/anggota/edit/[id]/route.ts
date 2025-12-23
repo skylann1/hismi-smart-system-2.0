@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { uploadImage, deleteImage } from "@/lib/supabase/services";
 import { updateUser, getDataById } from "@/lib/firebase/services";
 import getAccessByRoleAndDivisi from "@/lib/utils/accessMapping";
+import { UserType } from "@/types";
 
 function generatePasswordFromDate(dateString: string): string {
   const date = new Date(dateString);
@@ -20,7 +21,8 @@ export async function PATCH(
     const data = await req.formData();
 
     // ambil user lama (buat cek image lama)
-    const oldUser = await getDataById("users", id);
+    const oldUser = await getDataById<UserType>("users", id);
+
     const oldImageUrl = oldUser.success ? (oldUser.data?.imageUrl as string) : undefined;
 
     // --- handle image ---

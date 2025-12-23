@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDataByNama } from "@/lib/firebase/services";
+import { DivisiSettingsType } from "@/types";
 
 export async function GET(req: NextRequest, context: { params: Promise<{ slug: string }> }) {
     try {
         const { slug } = await context.params;
 
         if (slug) {
-            const divisiData = await getDataByNama("divisi", slug);
+            const divisiData = await getDataByNama<DivisiSettingsType>("divisi", slug);
             if (divisiData.success) {
                 return NextResponse.json({ status: true, message: "Success retrieving divisi", data: divisiData.data }, { status: 200 });
             } else {

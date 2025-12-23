@@ -33,7 +33,7 @@ const formInputConcept = ["umum", "akademik", "himsi"];
 
 export default function Page() {
   const params = useParams();
-  const id = params.id;
+  const id = params.id as string;
   const dispatch = useAppDispatch();
   const [submitLoading, setSubmitLoading] = useState(false);
   const router = useRouter();
@@ -421,11 +421,10 @@ export default function Page() {
       >
         {/* Informasi Umum */}
         <div
-          className={`w-full flex flex-col transition-all duration-300 ease-in-out ${
-            formInput !== "umum"
+          className={`w-full flex flex-col transition-all duration-300 ease-in-out ${formInput !== "umum"
               ? "opacity-0 pointer-events-none absolute"
               : "opacity-100"
-          }`}
+            }`}
         >
           <h2 className="text-xl font-semibold text-gray-800">
             Informasi Umum
@@ -498,11 +497,10 @@ export default function Page() {
                 type="button"
                 disabled={formInputIsValid[0]}
                 aria-disabled={formInputIsValid[0]}
-                className={`text-white ${
-                  formInputIsValid[0]
+                className={`text-white ${formInputIsValid[0]
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-primary cursor-pointer"
-                } rounded-lg px-3 py-1`}
+                  } rounded-lg px-3 py-1`}
                 onClick={() => setFormInput("akademik")}
               >
                 Berikutnya
@@ -513,11 +511,10 @@ export default function Page() {
 
         {/* Informasi Akademik */}
         <div
-          className={`w-full flex flex-col transition-all duration-300 ease-in-out ${
-            formInput !== "akademik"
+          className={`w-full flex flex-col transition-all duration-300 ease-in-out ${formInput !== "akademik"
               ? "opacity-0 pointer-events-none absolute"
               : "opacity-100"
-          }`}
+            }`}
         >
           <h2 className="text-xl font-semibold text-gray-800">
             Informasi Akademik
@@ -591,11 +588,10 @@ export default function Page() {
                 type="button"
                 disabled={formInputIsValid[1]}
                 aria-disabled={formInputIsValid[1]}
-                className={`text-white ${
-                  formInputIsValid[1]
+                className={`text-white ${formInputIsValid[1]
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-primary cursor-pointer"
-                } rounded-lg px-3 py-1`}
+                  } rounded-lg px-3 py-1`}
                 onClick={() => setFormInput("himsi")}
               >
                 Berikutnya
@@ -606,11 +602,10 @@ export default function Page() {
 
         {/* Informasi HIMSI */}
         <div
-          className={`w-full flex flex-col transition-all duration-300 ease-in-out ${
-            formInput !== "himsi"
+          className={`w-full flex flex-col transition-all duration-300 ease-in-out ${formInput !== "himsi"
               ? "opacity-0 pointer-events-none absolute"
               : "opacity-100"
-          }`}
+            }`}
         >
           <h2 className="text-xl font-semibold text-gray-800">
             Informasi keanggotaan HIMSI
@@ -659,11 +654,10 @@ export default function Page() {
                 type="submit"
                 disabled={formInputIsValid[2] || submitLoading}
                 aria-disabled={formInputIsValid[2] || submitLoading}
-                className={`text-white ${
-                  formInputIsValid[2] || submitLoading
+                className={`text-white ${formInputIsValid[2] || submitLoading
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-primary cursor-pointer"
-                } rounded-lg px-3 py-1`}
+                  } rounded-lg px-3 py-1`}
               >
                 {submitLoading ? "wait..." : "Submit"}
               </button>

@@ -282,34 +282,34 @@ export default async function Page() {
           </div>
         </div>
 
-        <div className="lg:hidden flex flex-col w-full">
-          <div className="w-full h-full grid lg:hidden grid-cols-[90%_70%] relative ml-[-80px] mt-8 gap-6 items-end">
-            <div className="space-y-9 w-full h-fit z-10">
+        <div className="lg:hidden flex flex-col w-full px-6 gap-6">
+          <div className="w-full grid grid-cols-2 gap-4">
+            <div className="space-y-4 w-full h-fit z-10">
               <Image
                 width={1000}
                 height={1000}
                 src="/assets/static-img/bph.jpg"
                 alt="People working in office"
-                className="w-full object-cover rounded-3xl shadow-2xl transform hover:scale-105 transition-transform duration-300 shadow-black/40 opacity-90"
+                className="w-full object-cover rounded-2xl shadow-lg"
               />
             </div>
-            <div className="space-y-9 h-fit w-full z-10">
+            <div className="space-y-4 h-fit w-full z-10 pt-8">
               <Image
                 width={1000}
                 height={1000}
                 src="/assets/static-img/bph2.jpg"
                 alt="Man on a video call"
-                className="w-full object-cover rounded-3xl shadow-2xl transform hover:scale-105 transition-transform duration-300 shadow-black/40 opacity-90"
+                className="w-full object-cover rounded-2xl shadow-lg"
               />
             </div>
           </div>
-          <div className="mt-6 ml-[-50px] w-full">
+          <div className="w-full">
             <Image
               width={1000}
               height={1000}
               src="/assets/static-img/bph.jpg"
               alt="People working in office"
-              className="w-full object-cover rounded-3xl shadow-2xl transform hover:scale-105 transition-transform duration-300 shadow-black/40 opacity-90"
+              className="w-full object-cover rounded-2xl shadow-lg"
             />
           </div>
         </div>

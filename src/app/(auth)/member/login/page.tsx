@@ -263,7 +263,7 @@ export default function LoginPage() {
             <div className="w-full justify-center items-center text-center font-medium text-sm mt-2 opacity-90">
               Dont have an account?{" "}
               <Link
-                href="/register"
+                href="/guest/register"
                 className="text-sky-800 underline underline-offset-1"
               >
                 Register

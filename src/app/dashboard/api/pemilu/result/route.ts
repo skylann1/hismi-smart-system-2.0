@@ -4,7 +4,8 @@ import { getPemiluConfig, getRealCountResults } from "@/lib/firebase/services";
 export async function GET() {
     // 1. Cek Config
     const configRes = await getPemiluConfig();
-    const isPublished = configRes.data?.isResultPublished;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const isPublished = (configRes.data as any)?.isResultPublished;
 
     // Kalau settingan OFF, balikin status khusus
     if (!isPublished) {
@@ -19,7 +20,7 @@ export async function GET() {
     const result = await getRealCountResults();
 
     return NextResponse.json({
-        ...result, 
+        ...result,
         success: true,
         isPublished: true
     });

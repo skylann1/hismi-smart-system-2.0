@@ -14,7 +14,8 @@ export async function PATCH(req: NextRequest) {
     // 1. Ambil Data Lama (PENTING: Buat tau URL foto lama kalo mau dihapus)
     const oldDataRes = await getPaslonById(id);
     if (!oldDataRes.success || !oldDataRes.data) throw new Error("Data lama tidak ditemukan");
-    const oldData = oldDataRes.data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const oldData = oldDataRes.data as any;
 
     // 2. Setup Variable URL (Default pake yang lama)
     let urlKetua = oldData.ketua.foto;
@@ -26,11 +27,11 @@ export async function PATCH(req: NextRequest) {
       // User upload baru:
       // A. Hapus foto lama di Supabase (Bersih-bersih)
       if (urlKetua) await deleteImage(urlKetua, "images");
-      
+
       // B. Upload foto baru
       const upKetua = await uploadImage(fileKetua, "paslon-ketua");
       if (!upKetua.success) throw new Error("Gagal upload foto ketua baru");
-      
+
       // C. Update URL
       urlKetua = upKetua.url;
     }

@@ -24,7 +24,8 @@ export default function VotePage() {
 
   // MOCK USER
   const currentUser = {
-    id: session?.user?.id as string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    id: (session?.user as any)?.id as string,
     email: session?.user?.email as string,
   };
 

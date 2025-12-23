@@ -11,6 +11,7 @@ export const ROLES = {
   SEKRETARIS: "8",
   KETUA_WAKIL: "9",
   SETTINGS: "10",
+  GUEST: "guest",
 };
 
 /**

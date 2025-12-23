@@ -1,7 +1,7 @@
 import { app } from "./config";
 import { getFirestore, collection, addDoc, getDocs, query, where, getDoc, doc, updateDoc, setDoc, writeBatch, deleteDoc, getCountFromServer, runTransaction } from "firebase/firestore";
 import bcrypt from "bcryptjs";
-import type { UserType, DivisiSettingsType, FormBlog, PertemuanFormData, ProkerFormData, KegiatanFormData, PaslonType } from "@/types";
+import type { UserType, DivisiSettingsType, FormBlog, PertemuanFormData, ProkerFormData, KegiatanFormData, PaslonType, NotulensiFormData } from "@/types";
 
 const firestore = getFirestore(app);
 
@@ -21,25 +21,61 @@ export async function getData(collectionName: string) {
   }
 }
 
-export async function getDataById(collectionName: string, id: string) {
+export async function getDataById<T>(
+  collectionName: string,
+  id: string
+): Promise<
+  | { success: true; data: T }
+  | { success: false; message: string }
+> {
   const snapshot = await getDoc(doc(firestore, collectionName, id));
+
   if (!snapshot.exists()) {
-    return { success: false, message: `No data ${id} found in ${collectionName} collection nama.` };
+    return {
+      success: false,
+      message: `No data ${id} found in ${collectionName} collection.`,
+    };
   }
-  return { success: true, data: { id: snapshot.id, ...snapshot.data() } };
+
+  return {
+    success: true,
+    data: {
+      id: snapshot.id,
+      ...(snapshot.data() as Omit<T, "id">),
+    } as T,
+  };
 }
 
-export async function getDataByNama(collectionName: string, nama: string) {
-  const q = query(collection(firestore, collectionName), where("nama", "==", nama));
+export async function getDataByNama<T>(
+  collectionName: string,
+  nama: string
+): Promise<
+  | { success: true; data: T }
+  | { success: false; message: string }
+> {
+  const q = query(
+    collection(firestore, collectionName),
+    where("nama", "==", nama)
+  );
+
   const snapshot = await getDocs(q);
-  const existingData = snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data()
-  })) as Array<{ id: string; email: string }>;
+
   if (snapshot.empty) {
-    return { success: false, message: `no data found by nama ${nama} in ${collectionName} collection` };
+    return {
+      success: false,
+      message: `No data found by nama ${nama} in ${collectionName} collection`,
+    };
   }
-  return { success: true, data: existingData[0] };
+
+  const docSnap = snapshot.docs[0];
+
+  return {
+    success: true,
+    data: {
+      id: docSnap.id,
+      ...(docSnap.data() as Omit<T, "id">),
+    } as T,
+  };
 }
 
 export async function addAnggota(data: {
@@ -79,6 +115,40 @@ export async function addAnggota(data: {
   }).catch((error) => {
     callback({ success: false, message: error.message });
   });
+}
+
+export async function addGuest(data: {
+  nama: string;
+  email: string;
+  password: string;
+}, callback: (result: { success: boolean; message?: string }) => void) {
+  try {
+    const q = query(collection(firestore, "users"), where("email", "==", data.email));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      callback({ success: false, message: "Email sudah terdaftar." });
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const newData = {
+      nama: data.nama,
+      email: data.email,
+      password: hashedPassword,
+      role: "guest",
+      access: ["guest", "pemilu"], // Explicitly giving guest access
+      createdAt: new Date(),
+      divisi: "Guest",
+      imageUrl: "", // Default empty or placeholder
+    };
+
+    await addDoc(collection(firestore, "users"), newData);
+    callback({ success: true, message: "Registrasi guest berhasil." });
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : "Unknown error";
+    callback({ success: false, message: errMsg });
+  }
 }
 
 export async function login(data: { email: string }) {
@@ -238,7 +308,7 @@ export async function addPertemuan(
       success: true,
       message: "Pertemuan dan absensi anggota berhasil ditambahkan.",
     });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error("Error addPertemuan:", err);
     callback({
@@ -343,7 +413,7 @@ export async function addProker(
       success: true,
       message: "Proker dan absensi anggota berhasil ditambahkan.",
     });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error("Error addProker:", err);
     callback({
@@ -517,7 +587,7 @@ export async function updateAbsen(eventId: string, absenList: AttendanceUpdate[]
     await batch.commit();
 
     return { success: true, message: "Absensi berhasil diperbarui" };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Error updating absen:", error);
     return { success: false, message: error.message || "Gagal update absensi" };
@@ -525,9 +595,9 @@ export async function updateAbsen(eventId: string, absenList: AttendanceUpdate[]
 }
 
 export async function getAbsenByNim(
-  collectionName: string, 
-  kegiatanId: string,     
-  nim: string             
+  collectionName: string,
+  kegiatanId: string,
+  nim: string
 ) {
   try {
     const absenRef = collection(firestore, collectionName, kegiatanId, "absen");
@@ -545,7 +615,7 @@ export async function getAbsenByNim(
       success: true,
       data: { id: absenId, ...absenData },
     };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error("Error getAbsenByNim:", err);
     return { success: false, message: err.message };
@@ -595,7 +665,7 @@ export async function getAllAbsenFromAllCollections() {
       success: true,
       data: allAbsen,
     };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error("Error getAllAbsenFromAllCollections:", err);
     return {
@@ -676,7 +746,7 @@ export async function getAllAbsenByAnggotaIdWithUser(anggotaId: string) {
       user: userData,
       data: allAbsen,
     };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error("Error getAllAbsenByAnggotaIdWithUser:", err);
     return {
@@ -686,7 +756,7 @@ export async function getAllAbsenByAnggotaIdWithUser(anggotaId: string) {
   }
 }
 
-export async function addPaslon(data: PaslonType) {
+export async function addPaslon(data: Omit<PaslonType, "id">) {
   try {
     const docRef = await addDoc(collection(firestore, "paslon"), {
       ...data,
@@ -702,12 +772,12 @@ export async function getPaslons() {
   try {
     const q = query(collection(firestore, "paslon"));
     const snapshot = await getDocs(q);
-    
+
     const data = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
-    
+
     return { success: true, data };
   } catch {
     return { success: false, message: "Gagal ambil data paslon" };
@@ -719,7 +789,7 @@ export async function getPaslonById(id: string) {
   try {
     const snapshot = await getDoc(doc(firestore, "paslon", id));
     if (!snapshot.exists()) return { success: false, message: "Data tidak ditemukan" };
-    return { success: true, data: snapshot.data() };
+    return { success: true, data: { id: snapshot.id, ...snapshot.data() } };
   } catch {
     return { success: false, message: "Error get detail" };
   }
@@ -754,14 +824,14 @@ export async function getPemiluConfig() {
     // Kita simpan di collection 'settings', document 'pemilu_config'
     const docRef = doc(firestore, "settings", "pemilu_config");
     const snapshot = await getDoc(docRef);
-    
+
     if (snapshot.exists()) {
       return { success: true, data: snapshot.data() };
     } else {
       // Default value kalo belum ada
       return { success: true, data: { isVotingOpen: false, isResultPublished: false } };
     }
-  } catch{
+  } catch {
     return { success: false, message: "Gagal ambil config" };
   }
 }
@@ -773,7 +843,7 @@ export async function updatePemiluConfig(data: { isVotingOpen: boolean; isResult
     // Pakai setDoc dengan merge:true biar aman
     await setDoc(docRef, { ...data, updatedAt: new Date() }, { merge: true });
     return { success: true };
-  } catch{
+  } catch {
     return { success: false, message: "Gagal update config" };
   }
 }
@@ -783,17 +853,17 @@ export async function getRealCountResults() {
   try {
     // 1. Ambil List Paslon dulu
     const paslonSnap = await getDocs(collection(firestore, "paslon"));
-    
+
     // 2. Hitung suara untuk setiap paslon
     const results = await Promise.all(
       paslonSnap.docs.map(async (doc) => {
         const paslonData = doc.data();
-        
+
         // Query ke collection 'votes' hitung yang milih paslon ini
         // Asumsi: di collection 'votes' ada field 'chosenPaslonId'
         const q = query(collection(firestore, "votes"), where("chosenPaslonId", "==", doc.id));
         const snapshot = await getCountFromServer(q);
-        
+
         return {
           id: doc.id,
           nomor_urut: paslonData.nomor_urut,
@@ -853,14 +923,14 @@ export async function submitVote(userId: string, paslonId: string, userProfile: 
         voterEmail: userProfile.email,
         createdAt: new Date(),
       });
-      
+
       // Note: Kita TIDAK perlu increment counter di dokumen Paslon secara manual
       // karena kita pakai sistem Real Count (hitung jumlah dokumen di collection votes) 
       // yang sudah kita buat di part Result sebelumnya. Ini lebih akurat.
     });
 
     return { success: true };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Transaction failed: ", error);
     return { success: false, message: typeof error === "string" ? error : "Gagal menyimpan suara." };
@@ -902,15 +972,15 @@ export async function getAllVotes() {
     // Mapping data biar API nerima data bersih
     const data = snapshot.docs.map((doc) => {
       const docData = doc.data();
-      
+
       // Handle timestamp biar aman pas dikirim
       let votingTime = null;
       if (docData.createdAt) {
         // Cek tipe timestamp firestore
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        votingTime = (docData.createdAt as any).toDate 
+        votingTime = (docData.createdAt as any).toDate
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ? (docData.createdAt as any).toDate() 
+          ? (docData.createdAt as any).toDate()
           : new Date(docData.createdAt);
       }
 
@@ -923,9 +993,45 @@ export async function getAllVotes() {
     });
 
     return { success: true, data };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Error get votes:", error);
     return { success: false, message: error.message };
+  }
+}
+
+export async function addNotulensi(data: NotulensiFormData) {
+  try {
+    const docRef = await addDoc(collection(firestore, "notulensi"), {
+      ...data,
+      createdAt: new Date(),
+    });
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    return { success: false, message: error instanceof Error ? error.message : "Gagal menambahkan notulensi" };
+  }
+}
+
+export async function getNotulensi() {
+  try {
+    const q = query(collection(firestore, "notulensi"));
+    const snapshot = await getDocs(q);
+    const data = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, message: "Gagal mengambil data notulensi" };
+  }
+}
+
+export async function updateNotulensi(id: string, data: Partial<NotulensiFormData>) {
+  try {
+    const docRef = doc(firestore, "notulensi", id);
+    await updateDoc(docRef, { ...data, updatedAt: new Date() });
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: "Gagal update notulensi" };
   }
 }

@@ -33,8 +33,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <Dashboard>
-        <SuccessAlert title={alert.title} description={alert.message} className={alert.isOpen && alert.status ? "right-5 opacity-100" : ""}/>
-        <FailAlert title={alert.title} description={alert.message} className={alert.isOpen && !alert.status ? "right-5 opacity-100" : ""}/>
+        <SuccessAlert title={alert.title} description={alert.message} className={alert.isOpen && alert.status ? "right-5 opacity-100" : ""} />
+        <FailAlert title={alert.title} description={alert.message} className={alert.isOpen && !alert.status ? "right-5 opacity-100" : ""} />
         {/* {
           alert.isOpen && (alert.status ? <SuccessAlert title={alert.title} description={alert.message} className="right-5 opacity-100" /> : <FailAlert title={alert.title} description={alert.message} className="right-5 opacity-100" />)
         } */}

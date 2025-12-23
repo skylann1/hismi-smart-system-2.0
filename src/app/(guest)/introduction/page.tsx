@@ -12,7 +12,7 @@ import {
   FaPeopleCarry,
 } from "react-icons/fa";
 import { GrResources } from "react-icons/gr";
-import { GiTechnoHeart, GiOwl, GiWolfHowl, GiAnt, GiDolphin  } from "react-icons/gi";
+import { GiTechnoHeart, GiOwl, GiWolfHowl, GiAnt, GiDolphin } from "react-icons/gi";
 import { FaPeopleGroup } from "react-icons/fa6";
 import { HiAcademicCap } from "react-icons/hi";
 import { FiPlus } from "react-icons/fi";
@@ -29,7 +29,7 @@ export default function Page() {
   // console.log(firstFaq);
   return (
     <div className="w-full">
-      <div className="w-full h-[85vh] flex justify-between items-center md:px-12 px-6 relative  bg-linear-to-t from-white to-transparent">
+      <div className="w-full h-[85vh] flex md:flex-row flex-col-reverse justify-center md:justify-between items-center md:px-12 px-6 relative bg-linear-to-t from-white to-transparent overflow-hidden">
         <div className="absolute top-0 w-[120%] h-full -z-10 left-0 opacity-60">
           <Image
             src={"/assets/static-img/background.jpg"}
@@ -39,11 +39,11 @@ export default function Page() {
             className="w-full h-full object-cover object-center"
           />
         </div>
-        <div className="flex flex-col justify-start md:w-1/2">
+        <div className="flex flex-col justify-start md:w-1/2 w-full mt-8 md:mt-0 z-10">
           <span className={`${inter.className} text-xl font-bold`}>
             Hi, Perkenalkan!
           </span>
-          <span className={`${inter.className} text-5xl font-bold`}>
+          <span className={`${inter.className} text-3xl md:text-5xl font-bold`}>
             Himpunan Mahasiswa Sistem Informasi
           </span>
           <span className={`${inter.className} font-medium text-sm`}>
@@ -105,7 +105,7 @@ export default function Page() {
       <div className="w-full md:px-12 px-6 flex flex-col justify-center">
         <div className="w-full bg-white rounded-b-2xl flex  justify-center items-center md:py-8 md:px-12 shadow-2xl ">
           <div className=" flex justify-center">
-            <div className="w-80">
+            <div className="w-full max-w-xs md:w-80">
               <Image
                 src={"/assets/static-img/logo.png"}
                 width={500}
@@ -161,7 +161,7 @@ export default function Page() {
       <div className="w-full flex flex-col md:px-12 px-6 justify-start items-center mt-12">
         <span className={`font-bold text-xl`}>SEJARAH</span>
 
-        <ol className="w-full flex justify-center items-start mt-3">
+        <ol className="w-full flex md:flex-row flex-col justify-center items-start mt-3">
           <li className="relative mb-6 sm:mb-0 md:w-[33%]">
             <div className="flex items-center">
               <div className="z-10 flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full ring-0 ring-whit shrink-0">
@@ -260,8 +260,8 @@ export default function Page() {
         </ol>
       </div>
 
-      <div className="w-full flex justify-center items-center gap-6 md:px-12 mt-16 px-6">
-        <div className="w-[50%] bg-sky-300/20 flex justify-center items-center rounded-r-xl p-6 shadow-xl h-full">
+      <div className="w-full flex flex-col md:flex-row justify-center items-center gap-6 md:px-12 mt-16 px-6">
+        <div className="w-full md:w-[50%] bg-sky-300/20 flex justify-center items-center rounded-r-xl p-6 shadow-xl h-full">
           <div className="md:w-[100%]">
             <Image
               src={"/assets/static-img/team-call.svg"}
@@ -272,7 +272,7 @@ export default function Page() {
             />
           </div>
         </div>
-        <div className="w-1/2 flex flex-col">
+        <div className="w-full md:w-1/2 flex flex-col">
           <span className="text-lg font-bold color-primary">HIMSI</span>
           <span className="text-4xl font-bold font-sans opacity-95">
             BPH DPC Kaliabang
@@ -320,7 +320,7 @@ export default function Page() {
           </span>
         </div>
         <div className=" md:px-16 px-8 w-full bg-[#f5f5f5] py-6 rounded-2xl">
-          <div className="w-full grid grid-cols-2 rounded-xl bg-white overflow-hidden border border-slate-200 shadow-md">
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 rounded-xl bg-white overflow-hidden border border-slate-200 shadow-md">
             <Link
               href="/"
               className="w-full h-60 border border-slate-200 rounded-tl-xl flex flex-col justify-between items-start md:p-6 relative"
@@ -475,7 +475,7 @@ export default function Page() {
 
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-purple-900/40 flex justify-center items-center flex-col">
-              <h1 className="text-4xl font-bold text-white font-sans">
+              <h1 className="text-2xl md:text-4xl font-bold text-white font-sans">
                 We are HIMSI!
               </h1>
               <span className="text-sm font-medium text-white opacity-60">
@@ -490,19 +490,19 @@ export default function Page() {
       </div>
 
       <div className="mt-16 bg-slate-950 w-full md:px-12 px-6 py-24 relative">
-        <div className="w-full bg-white/10 backdrop-blur-3xl rounded-3xl z-20 text-white px-8 py-16 flex justify-between items-center gap-16">
-          <div className="w-96 max-h-[26rem] rounded-2xl overflow-hidden">
+        <div className="w-full bg-white/10 backdrop-blur-3xl rounded-3xl z-20 text-white px-8 py-16 flex flex-col md:flex-row justify-between items-center gap-10 md:gap-16">
+          <div className="w-full md:w-96 h-64 md:h-[26rem] rounded-2xl overflow-hidden shrink-0">
             <Image
               src="/assets/static-img/oprec-benner.jpg"
               width={1000}
               height={1000}
               alt="himsi lpko"
-              className="w-full h-full object-fill object-center brightness-[175%] contrast-[110%]"
+              className="w-full h-full object-cover object-center brightness-[175%] contrast-[110%]"
             />
           </div>
-          <div className="flex-1 flex flex-col h-full z-20">
+          <div className="flex-1 flex flex-col h-full z-20 w-full">
             <h1
-              className={`${inter.className} text-5xl font-semibold font-sans tracking-tighter`}
+              className={`${inter.className} text-3xl md:text-5xl font-semibold font-sans tracking-tighter`}
             >
               Join our team
             </h1>
@@ -570,9 +570,8 @@ export default function Page() {
                 <FiPlus className="text-xl opacity-95" />
               </div>
               <div
-                className={`w-full opacity-70 text-sm font-normal mt-4 ${
-                  firstFaq ? "block" : "hidden"
-                }`}
+                className={`w-full opacity-70 text-sm font-normal mt-4 ${firstFaq ? "block" : "hidden"
+                  }`}
               >
                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit
                 nostrum eaque quae modi ad sapiente impedit fugiat sequi, iusto
@@ -593,9 +592,8 @@ export default function Page() {
                 <FiPlus className="text-xl opacity-95" />
               </div>
               <div
-                className={`w-full opacity-70 text-sm font-normal mt-4 ${
-                  twoFaq ? "block" : "hidden"
-                }`}
+                className={`w-full opacity-70 text-sm font-normal mt-4 ${twoFaq ? "block" : "hidden"
+                  }`}
               >
                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit
                 nostrum eaque quae modi ad sapiente impedit fugiat sequi, iusto
@@ -616,9 +614,8 @@ export default function Page() {
                 <FiPlus className="text-xl opacity-95" />
               </div>
               <div
-                className={`w-full opacity-70 text-sm font-normal mt-4 ${
-                  threeFaq ? "block" : "hidden"
-                }`}
+                className={`w-full opacity-70 text-sm font-normal mt-4 ${threeFaq ? "block" : "hidden"
+                  }`}
               >
                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit
                 nostrum eaque quae modi ad sapiente impedit fugiat sequi, iusto
@@ -639,9 +636,8 @@ export default function Page() {
                 <FiPlus className="text-xl opacity-95" />
               </div>
               <div
-                className={`w-full opacity-70 text-sm font-normal mt-4 ${
-                  fourFaq ? "block" : "hidden"
-                }`}
+                className={`w-full opacity-70 text-sm font-normal mt-4 ${fourFaq ? "block" : "hidden"
+                  }`}
               >
                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit
                 nostrum eaque quae modi ad sapiente impedit fugiat sequi, iusto
@@ -662,9 +658,8 @@ export default function Page() {
                 <FiPlus className="text-xl opacity-95" />
               </div>
               <div
-                className={`w-full opacity-70 text-sm font-normal mt-4 ${
-                  fiveFaq ? "block" : "hidden"
-                }`}
+                className={`w-full opacity-70 text-sm font-normal mt-4 ${fiveFaq ? "block" : "hidden"
+                  }`}
               >
                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit
                 nostrum eaque quae modi ad sapiente impedit fugiat sequi, iusto

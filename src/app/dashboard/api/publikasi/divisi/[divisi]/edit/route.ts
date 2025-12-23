@@ -11,7 +11,7 @@ export async function PATCH(
         const formData = await req.formData();
         const { divisi } = await context.params;
 
-        const oldDivisiRes = await getDataByNama("divisi", divisi);
+        const oldDivisiRes = await getDataByNama<DivisiSettingsType>("divisi", divisi);
         const oldImages = oldDivisiRes.success
             ? (oldDivisiRes.data?.images as Record<string, string | null> | undefined)
             : undefined;
@@ -40,11 +40,11 @@ export async function PATCH(
         }
 
         const images: Record<`image${1 | 2 | 3 | 4 | 5}`, string | null> = {
-            image1: oldImages?.image1 ?? null,
-            image2: oldImages?.image2 ?? null,
-            image3: oldImages?.image3 ?? null,
-            image4: oldImages?.image4 ?? null,
-            image5: oldImages?.image5 ?? null,
+            image1: typeof oldImages?.image1 === 'string' ? oldImages.image1 : null,
+            image2: typeof oldImages?.image2 === 'string' ? oldImages.image2 : null,
+            image3: typeof oldImages?.image3 === 'string' ? oldImages.image3 : null,
+            image4: typeof oldImages?.image4 === 'string' ? oldImages.image4 : null,
+            image5: typeof oldImages?.image5 === 'string' ? oldImages.image5 : null,
         };
 
         for (let i = 1; i <= 5; i++) {
@@ -59,7 +59,7 @@ export async function PATCH(
 
                 const uploadRes = await uploadImage(file, "divisi");
                 if (uploadRes.success) {
-                    images[key] = uploadRes.url;
+                    images[key] = uploadRes.url ?? null;
                 }
             }
         }

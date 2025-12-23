@@ -9,12 +9,13 @@ export interface UserType {
   tipe_kelas: string;
   tahun_masuk?: string;
   divisi?: string;
-  role?: string;
+  role?: string; // "1" | "2" | ... | "guest"
   image?: File | null | string;
   id?: string;
   access?: string[];
   password?: string;
   imageUrl: string;
+  status?: string;
 }
 
 export interface PoinDivisi {
@@ -97,7 +98,7 @@ export interface KegiatanFormData {
 }
 
 export interface PaslonType {
-  // id?: string;
+  id: string;
   nomor_urut: number;
   tagline: string;
   visi: string;
@@ -118,3 +119,12 @@ export interface PaslonType {
   createdAt: Date;
 };
 
+
+export interface NotulensiFormData {
+  judul: string;
+  kategori: "acara" | "pertemuan";
+  refId: string; // ID dari Acara atau Pertemuan
+  tanggal: string;
+  isi: string;
+  author: string;
+}

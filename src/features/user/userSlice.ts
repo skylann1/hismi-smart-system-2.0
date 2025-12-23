@@ -16,7 +16,7 @@ const initialState: UserType = {
     tahun_masuk: "",
     divisi: "",
     role: "",
-    image: "",
+    imageUrl: "",
     access: [],
 };
 
@@ -38,8 +38,8 @@ export const userSlice = createSlice({
             state.divisi = action.payload.divisi;
             state.role = action.payload.role;
             state.image = action.payload.image;
+            state.imageUrl = action.payload.imageUrl;
             state.access = action.payload.access;
-
         },
 
         resetUser() {
