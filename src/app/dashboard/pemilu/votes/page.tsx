@@ -191,7 +191,12 @@ export default function VotePage() {
               Ingat, satu akun hanya memiliki satu hak suara.
             </span>
           </p>
-          <Link href={'/dashboard/pemilu/information'} className="text-sm text-indigo-600 mt-6 font-semibold underline underline-offset-1">informasi lengkap paslon.</Link>
+          <Link
+            href={"/dashboard/pemilu/information"}
+            className="text-sm text-indigo-600 mt-6 font-semibold underline underline-offset-1"
+          >
+            informasi lengkap paslon.
+          </Link>
         </div>
 
         {/* Grid Card yang baru */}
@@ -271,7 +276,9 @@ export default function VotePage() {
                   <span className="font-semibold">
                     Paslon No. {selectedCandidate.nomor_urut}
                   </span>
-                  . Pastikan pilihan Anda sudah benar dan pastikan anda telah memeriksa informasi mengenai paslon sebelum melanjutkan, karena setelah dikonfirmasi, suara Anda tidak dapat diubah.
+                  . Pastikan pilihan Anda sudah benar dan pastikan anda telah
+                  memeriksa informasi mengenai paslon sebelum melanjutkan,
+                  karena setelah dikonfirmasi, suara Anda tidak dapat diubah.
                 </p>
               </div>
             </div>
