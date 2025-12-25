@@ -27,7 +27,7 @@ interface PertemuanFormData {
 export default function TambahPertemuanPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const url = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/pertemuan/tambah`;
+  const url = `/dashboard/api/pertemuan/tambah`;
   const [formData, setFormData] = useState<PertemuanFormData>({
     judul: "",
     lokasi: "",

@@ -27,7 +27,7 @@ interface KegiatanFormData {
 export default function TambahKegiatanPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const url = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/kegiatan/tambah`;
+  const url = `/dashboard/api/kegiatan/tambah`;
   const [formData, setFormData] = useState<KegiatanFormData>({
     judul: "",
     lokasi: "",

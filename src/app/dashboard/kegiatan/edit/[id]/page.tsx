@@ -146,7 +146,7 @@ export default function EditKegiatanPage({
     try {
       if (isFormValid) {
         const submitData = async () => {
-          const response = await fetch(`${url}/dashboard/api/kegiatan/edit`, {
+          const response = await fetch(`/dashboard/api/kegiatan/edit`, {
             method: "PATCH",
             headers: {
               "Content-Type": "application/json",
@@ -202,7 +202,7 @@ export default function EditKegiatanPage({
       try {
         setIsLoading(true);
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/kegiatan?id=${id}`,
+          `/dashboard/api/kegiatan?id=${id}`,
           { cache: "no-store", method: "GET" }
         );
         const json = await response.json();

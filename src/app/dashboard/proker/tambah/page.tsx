@@ -29,7 +29,7 @@ interface ProkerFormData {
 export default function TambahProkerPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const url = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/proker/tambah`;
+  const url = `/dashboard/api/proker/tambah`;
   const [formData, setFormData] = useState<ProkerFormData>({
     judul: "",
     lokasi: "",

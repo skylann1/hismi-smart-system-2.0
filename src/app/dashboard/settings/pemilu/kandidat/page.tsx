@@ -19,9 +19,7 @@ export default function Page() {
       try {
         // Asumsi endpoint API lu di /api/paslon
         const res = await fetch(
-          `${
-            process.env.NEXT_PUBLIC_BASE_URL || ""
-          }/dashboard/api/pemilu/paslon`
+          `/dashboard/api/pemilu/paslon`
         );
         const data = await res.json();
         if (data.success) {

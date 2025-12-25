@@ -30,7 +30,6 @@ export default function EditPertemuanPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const url = `${process.env.NEXT_PUBLIC_BASE_URL}`;
   const dispatch = useAppDispatch();
   const [formData, setFormData] = useState<PertemuanFormData>({
     judul: "",
@@ -164,7 +163,7 @@ export default function EditPertemuanPage({
       try {
         setIsLoading(true);
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/pertemuan?id=${id}`,
+          `/dashboard/api/pertemuan?id=${id}`,
           { cache: "no-store" }
         );
         const json = await response.json();
@@ -198,7 +197,7 @@ export default function EditPertemuanPage({
     try {
       if (isFormValid) {
         const submitData = async () => {
-          const response = await fetch(`${url}/dashboard/api/pertemuan/edit`, {
+          const response = await fetch(`/dashboard/api/pertemuan/edit`, {
             method: "PATCH",
             headers: {
               "Content-Type": "application/json",

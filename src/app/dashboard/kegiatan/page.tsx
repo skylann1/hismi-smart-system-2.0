@@ -41,7 +41,7 @@ const StatusBadge = ({ status }: { status: "Upcoming" | "Passed" | "Ongoing" }) 
 
 
 const DaftarKegiatan = () => {
-  const url = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/kegiatan`;
+  const url = `/dashboard/api/kegiatan`;
   const [isLoading, setIsLoading] = useState(true);
   const [kegiatans, setKegiatans] = useState<TableRow[]>([]);
 
@@ -60,7 +60,7 @@ const DaftarKegiatan = () => {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/kegiatan/delete?id=${id}`, {
+      const response = await fetch(`/dashboard/api/kegiatan/delete?id=${id}`, {
         method: "DELETE",
       });
 

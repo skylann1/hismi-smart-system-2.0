@@ -34,7 +34,7 @@ export default function TambahProkerPage({
   const { id } = use(params);
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const url = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/proker/edit`;
+  const url = `/dashboard/api/proker/edit`;
   const [formData, setFormData] = useState<ProkerFormData>({
     judul: "",
     lokasi: "",
@@ -239,7 +239,7 @@ export default function TambahProkerPage({
       try {
         setIsLoading(true);
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/proker?id=${id}`,
+          `/dashboard/api/proker?id=${id}`,
           { cache: "no-store" }
         );
         const json = await response.json();

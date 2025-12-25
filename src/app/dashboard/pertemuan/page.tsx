@@ -38,7 +38,7 @@ const StatusBadge = ({ status }: { status: "Upcoming" | "Passed" | "Ongoing" }) 
 
 const DaftarPertemuan = () => {
   // Fetch data from the server or any other asynchronous operation
-  const url = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/pertemuan`;
+  const url = `/dashboard/api/pertemuan`;
   const [data, setData] = useState<TableRow[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -57,7 +57,7 @@ const DaftarPertemuan = () => {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/pertemuan/delete?id=${id}`, {
+      const response = await fetch(`/dashboard/api/pertemuan/delete?id=${id}`, {
         method: "DELETE",
       });
 

@@ -39,7 +39,7 @@ const StatusBadge = ({ status }: { status: "Upcoming" | "Passed" | "Ongoing" }) 
 };
 
 const DaftarProker = () => {
-  const url = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/proker`;
+  const url = `/dashboard/api/proker`;
   const [isLoading, setIsLoading] = useState(true);
   const [prokers, setProkers] = useState<TableRow[]>([]);
 
@@ -59,7 +59,7 @@ const DaftarProker = () => {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/proker/delete?id=${id}`, {
+      const response = await fetch(`/dashboard/api/proker/delete?id=${id}`, {
         method: "DELETE",
       });
 

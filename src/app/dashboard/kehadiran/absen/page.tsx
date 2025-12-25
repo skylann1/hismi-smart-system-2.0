@@ -124,7 +124,7 @@ const KelolaAbsensiPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/acara`;
+      const url = `/dashboard/api/acara`;
       if (!url) {
         console.error("NEXT_PUBLIC_BASE_URL is not defined");
         return;

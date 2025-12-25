@@ -15,7 +15,7 @@ export default function Page() {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/anggota/delete?id=${id}`, {
+      const response = await fetch(`/dashboard/api/anggota/delete?id=${id}`, {
         method: "DELETE",
       });
 
@@ -38,7 +38,7 @@ export default function Page() {
     const getData = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/anggota`
+          `/dashboard/api/anggota`
         );
         const data = await res.json();
         if (data.success) setUsers(data.data);
