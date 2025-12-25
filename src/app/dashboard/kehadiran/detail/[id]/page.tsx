@@ -118,7 +118,7 @@ export default function DetailAbsensiPage() {
       try {
         setIsLoading(true);
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/kehadiran/summary?id=` +
+          `/dashboard/api/kehadiran/summary?id=` +
             id,
           { cache: "no-store" }
         );

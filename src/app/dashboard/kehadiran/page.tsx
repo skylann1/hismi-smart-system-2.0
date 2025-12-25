@@ -43,7 +43,7 @@ const DaftarAbsensi = () => {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/kehadiran/summary`,
+          `/dashboard/api/kehadiran/summary`,
           { cache: "no-store" }
         );
         const json = await res.json();
