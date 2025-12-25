@@ -191,7 +191,7 @@ export default function EditPertemuanPage({
     };
 
     fetchData();
-  }, []);
+  }, [id]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -386,11 +386,10 @@ export default function EditPertemuanPage({
               <button
                 type="submit"
                 disabled={!isFormValid}
-                className={`text-white ${
-                  !isFormValid
+                className={`text-white ${!isFormValid
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-primary cursor-pointer hover:bg-primary-dark"
-                } rounded-lg px-4 py-2 font-semibold transition-colors`}
+                  } rounded-lg px-4 py-2 font-semibold transition-colors`}
               >
                 Tambah Pertemuan
               </button>

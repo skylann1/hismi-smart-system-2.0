@@ -53,6 +53,30 @@ const DaftarProker = () => {
     [key: string]: unknown;
   }
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Apakah Anda yakin ingin menghapus proker ini?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/proker/delete?id=${id}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert("Proker berhasil dihapus");
+        window.location.reload();
+      } else {
+        alert("Gagal menghapus proker: " + result.message);
+      }
+    } catch (error) {
+      console.error("Error deleting proker:", error);
+      alert("Terjadi kesalahan saat menghapus proker");
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -67,7 +91,7 @@ const DaftarProker = () => {
         if (!result.success) {
           throw new Error(result.message || "Failed to fetch proker data");
         }
-        const rawData = result.data as Proker [];
+        const rawData = result.data as Proker[];
         const formattedData = rawData.map((item) => ({
           id: item.id,
           judul: item.judul,
@@ -84,7 +108,7 @@ const DaftarProker = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [url]);
   return isLoading ? (
     <LoadingTableComponent />
   ) : (
@@ -101,12 +125,12 @@ const DaftarProker = () => {
           >
             Edit
           </Link>
-          <Link
-            href={`proker/delete/${proker.id}`}
+          <button
+            onClick={() => handleDelete(String(proker.id))}
             className="font-medium text-red-600 hover:underline"
           >
             Hapus
-          </Link>
+          </button>
         </div>
       )}
     />

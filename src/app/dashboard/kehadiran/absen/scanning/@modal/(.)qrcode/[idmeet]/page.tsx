@@ -10,13 +10,10 @@ import { FaSquarePhone } from "react-icons/fa6";
 import { IoMdMail } from "react-icons/io";
 import { IoPersonCircleSharp } from "react-icons/io5";
 import CardActionStatus from "@/components/ui/templates/modal/CardActionStatus";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
+import { redirect } from "next/navigation";
 
 type ScanStatus = "idle" | "starting" | "scanning" | "stopping" | "error";
-interface statusAbsen {
-  status: true | false;
-  message: string;
-}
 
 interface Data {
   id: string;
@@ -31,9 +28,10 @@ interface Data {
 }
 
 export default function ModalScanQRCode() {
-  const { tipe, idmeet } = useParams();
-  console.log("id meet is", idmeet);
-  console.log(idmeet, tipe);
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const idmeet = params.idmeet as string;
+  const tipe = searchParams.get('tipe') || '';
   const router = useRouter();
 
   const handleCLickClose = () => {
@@ -46,17 +44,18 @@ export default function ModalScanQRCode() {
   const [onProsses, setOnProsses] = useState(false);
   const [prossesIsDone, setProssesIsDone] = useState<boolean>(false);
   const [data, setData] = useState<Data>();
-  const [statusAbsen, setStatusAbsen] = useState<statusAbsen>({
-    status: false,
-    message: "",
-  });
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [status, setStatus] = useState<ScanStatus>("idle");
   const [scanResult, setScanResult] = useState<string | null>(null);
-  console.log(scanResult);
-  console.log(data);
   const [errMsg, setErrMsg] = useState<string | null>(null);
+
+  // Validate required parameters
+  useEffect(() => {
+    if (!idmeet || !tipe) {
+      setErrMsg("Parameter tidak lengkap. Harap akses halaman ini dari menu absensi.");
+    }
+  }, [idmeet, tipe]);
 
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const scannerId = "qr-reader";
@@ -108,7 +107,7 @@ export default function ModalScanQRCode() {
           setScanResult(decodedText);
           stopScanning();
         },
-        () => {}
+        () => { }
       );
 
       setStatus("scanning");
@@ -184,8 +183,9 @@ export default function ModalScanQRCode() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const res = await fetch(
-          `/dashboard/api/kehadiran/anggota?id=${tipe}&tipe=${idmeet}&nim=${scanResult}`,
+          `/dashboard/api/kehadiran/anggota?id=${idmeet}&tipe=${tipe}&nim=${scanResult}`,
           {
             cache: "no-store",
           }
@@ -193,27 +193,67 @@ export default function ModalScanQRCode() {
 
         if (!res.ok) {
           alert("Oops maaf nih, lagi ada trouble silahkan coba lagi nanti.");
+          redirect("/dashboard/kehadiran/absen");
+
         }
         const data = await res.json();
         setData(data.data);
-      } catch {
-        console.error("Oops! something wrong in when u try to fetch");
+      } catch (error) {
+        console.error("Oops! something wrong in when u try to fetch:", error);
+        alert("Terjadi kesalahan saat mengambil data anggota");
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    if (scanResult) fetchData();
-  }, [scanResult]);
+    if (scanResult) {
+      fetchData();
+    }
+  }, [scanResult, idmeet, tipe]);
 
-  const onAbsenSubmit = () => {
+  const onAbsenSubmit = async () => {
+    // Validate we have all required data
+    if (!scanResult || !tipe || !idmeet) {
+      alert("Data tidak lengkap. Silakan scan ulang.");
+      return;
+    }
+
     setOnProsses(true);
-    setTimeout(() => {
-      setOnProsses(false);
-      setStatusAbsen({
-        status: true,
-        message: "Absen Berhasil",
+
+    try {
+      // Use the new dedicated API endpoint
+      const response = await fetch("/api/attendance/scan", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          eventId: idmeet,
+          eventType: tipe,
+          userNim: scanResult,  // NIMfrom QR code
+          status: "hadir"
+        }),
       });
-      setProssesIsDone(true);
-    }, 2000);
+
+      const result = await response.json();
+
+      if (result.success) {
+        setProssesIsDone(true);
+
+        // Update local data if we have it
+        if (data) {
+          setData({ ...data, status: "hadir" });
+        }
+      } else {
+        console.log("❌ Attendance failed:", result.message);
+        alert("Gagal melakukan absensi: " + result.message);
+      }
+    } catch (error) {
+      console.error("❌ Error submitting attendance:", error);
+      alert("Terjadi kesalahan saat melakukan absensi: " + (error instanceof Error ? error.message : "Unknown error"));
+    } finally {
+      setOnProsses(false);
+    }
   };
 
   return (
@@ -268,6 +308,8 @@ export default function ModalScanQRCode() {
                         selectedCamera && startScanning(selectedCamera)
                       }
                       disabled={
+                        !idmeet ||
+                        !tipe ||
                         !selectedCamera ||
                         !isScriptLoaded ||
                         status === "starting" ||
@@ -349,7 +391,7 @@ export default function ModalScanQRCode() {
                         <Image
                           className="w-[60%] object-center object-cover absolute mx-auto left-0 right-0 top-4"
                           src={data.imageUrl}
-                          alt="Scan Success"
+                          alt={data.imageUrl}
                           width={1000}
                           height={1000}
                         />
@@ -397,10 +439,9 @@ export default function ModalScanQRCode() {
                     </div>
                     <div className="flex justify-end lg:hidden w-full mt-12">
                       <button
-                        className={`px-3 py-1 bg-indigo-500 text-white rounded-md text-sm font-semibold cursor-pointer flex gap-2 items-center disabled:opacity-80 ${
-                          data?.status === "hadir" &&
+                        className={`px-3 py-1 bg-indigo-500 text-white rounded-md text-sm font-semibold cursor-pointer flex gap-2 items-center disabled:opacity-80 ${data?.status === "hadir" &&
                           "cursor-not-allowed bg-red-500 "
-                        }`}
+                          }`}
                         onClick={onAbsenSubmit}
                         disabled={onProsses || data?.status === "hadir"}
                       >
@@ -434,10 +475,9 @@ export default function ModalScanQRCode() {
                   </div>
                   <div className="w-full flex items-center justify-end mt-10">
                     <button
-                      className={`px-3 py-1 bg-indigo-500 text-white rounded-md text-sm font-semibold cursor-pointer flex gap-2 items-center disabled:opacity-80 ${
-                        data?.status === "hadir" &&
+                      className={`px-3 py-1 bg-indigo-500 text-white rounded-md text-sm font-semibold cursor-pointer flex gap-2 items-center disabled:opacity-80 ${data?.status === "hadir" &&
                         "cursor-not-allowed bg-red-500 "
-                      }`}
+                        }`}
                       onClick={onAbsenSubmit}
                       disabled={onProsses || data?.status === "hadir"}
                     >

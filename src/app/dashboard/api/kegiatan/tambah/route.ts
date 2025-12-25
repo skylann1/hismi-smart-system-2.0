@@ -19,8 +19,8 @@ export async function POST(req: NextRequest) {
             });
         });
 
-        return NextResponse.json({ status: true, message: "Proker added successfully", data: formData }, { status: 200 });
+        return NextResponse.json({ status: true, message: "Kegiatan added successfully", data: formData }, { status: 200 });
     } catch (err) {
-        return NextResponse.json({ status: false, message: err }, { status: 500 });
+        return NextResponse.json({ status: false, message: err instanceof Error ? err.message : "Internal Server Error" }, { status: 500 });
     }
 }

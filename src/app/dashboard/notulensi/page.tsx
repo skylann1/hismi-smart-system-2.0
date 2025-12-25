@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { NotulensiFormData } from "@/types";
 
 export default function NotulensiPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

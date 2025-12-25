@@ -54,6 +54,31 @@ const DaftarKegiatan = () => {
     tanggal: string;
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Apakah Anda yakin ingin menghapus kegiatan ini?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/kegiatan/delete?id=${id}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert("Kegiatan berhasil dihapus");
+        // Refresh data
+        window.location.reload();
+      } else {
+        alert("Gagal menghapus kegiatan: " + result.message);
+      }
+    } catch (error) {
+      console.error("Error deleting kegiatan:", error);
+      alert("Terjadi kesalahan saat menghapus kegiatan");
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -71,11 +96,11 @@ const DaftarKegiatan = () => {
         const rawData = result.data as Kegiatan[];
         const formattedData = rawData.map((item) => ({
           id: item.id,
-          judul: item.judul,
-          divisi: item.divisi,
-          lokasi: item.lokasi,
+          judul: String(item.judul || ""),
+          divisi: String(item.divisi || ""),
+          lokasi: String(item.lokasi || ""),
           status: <StatusBadge status={item.status} />,
-          tanggal: item.tanggal,
+          tanggal: String(item.tanggal || ""),
         }));
         setKegiatans(formattedData);
       } catch (error) {
@@ -85,7 +110,7 @@ const DaftarKegiatan = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [url]);
   return (
     <>
       {isLoading ? (
@@ -97,12 +122,20 @@ const DaftarKegiatan = () => {
           headers={tableHeaders}
           data={kegiatans}
           renderActions={(kegiatan) => (
-            <Link
-              href={`kegiatan/edit/${kegiatan.id}`} // Arahkan ke halaman edit kegiatan
-              className="font-medium text-blue-600 hover:underline"
-            >
-              Edit
-            </Link>
+            <div className="flex gap-2">
+              <Link
+                href={`kegiatan/edit/${kegiatan.id}`}
+                className="font-medium text-blue-600 hover:underline"
+              >
+                Edit
+              </Link>
+              <button
+                onClick={() => handleDelete(String(kegiatan.id))}
+                className="font-medium text-red-600 hover:underline"
+              >
+                Delete
+              </button>
+            </div>
           )}
         />
       )}

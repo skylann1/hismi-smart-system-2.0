@@ -2,12 +2,13 @@ import ReusableTable, {
   type TableHeader,
   type TableRow,
 } from "@/components/ui/moleculs/table/PrimaryTable";
+import { use } from "react";
 // import Link from "next/link";
 
 type PageProps = {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 };
 
 const tableHeaders: TableHeader[] = [
@@ -27,8 +28,8 @@ const anggotaData: TableRow[] = [
   },
 ];
 
-export default async function DetailKasBulan({ params }: PageProps) {
-  const { slug } = params;
+export default function DetailKasBulan({ params }: PageProps) {
+  const { slug } = use(params);
   console.log(slug);
   return (
     <ReusableTable

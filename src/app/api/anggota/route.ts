@@ -1,6 +1,6 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function GET(req: NextRequest){
+export async function GET() {
     try {
         return NextResponse.json({ status: true, message: "Success retrieving anggota", data: [] }, { status: 200 });
     } catch (e) {

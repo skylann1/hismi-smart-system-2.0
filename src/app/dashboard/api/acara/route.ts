@@ -1,47 +1,41 @@
 import { NextResponse } from "next/server";
-import { getData } from "@/lib/firebase/services";
+import { collection, getDocs, getFirestore } from "firebase/firestore";
+import { app } from "@/lib/firebase/config";
 
-interface AcaraItem {
-    id: string;
-    judul: string;
-    tanggal: string;
-    lokasi: string;
-    status: string;
-}
+const firestore = getFirestore(app);
+
 
 export async function GET() {
     try {
-        const proker = await getData("proker");
-        const kegiatan = await getData("kegiatan");
-        const pertemuan = await getData("pertemuan");
+        const collections = ["pertemuan", "kegiatan", "proker"];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let allEvents: any[] = [];
 
-        if (!proker.success || !kegiatan.success || !pertemuan.success) {
-            return NextResponse.json(
-                { message: "Gagal mengambil data acara.", status: false },
-                { status: 404 }
-            );
+        for (const colName of collections) {
+            const snapshot = await getDocs(collection(firestore, colName));
+            const docs = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    ...data,
+                    type: colName, // "pertemuan", "kegiatan", or "proker"
+                };
+            });
+            allEvents = [...allEvents, ...docs];
         }
 
-        const combinedData = [
-            ...(proker.datas || []).map((item: any) => ({ ...item, type: "proker" })),
-            ...(kegiatan.datas || []).map((item: any) => ({ ...item, type: "kegiatan" })),
-            ...(pertemuan.datas || []).map((item: any) => ({ ...item, type: "pertemuan" })),
-        ];
-
-        combinedData.sort((a, b) => {
-            const tA = new Date(a.tanggal || a.tanggal_selesai || 0).getTime();
-            const tB = new Date(b.tanggal || b.tanggal_selesai || 0).getTime();
+        // Sort by date (ascending - earliest first)
+        allEvents.sort((a, b) => {
+            const tA = new Date(a.tanggal || 0).getTime();
+            const tB = new Date(b.tanggal || 0).getTime();
             return tA - tB;
         });
 
-        return NextResponse.json(
-            {
-                message: "Data acara berhasil diambil.",
-                status: true,
-                data: combinedData,
-            },
-            { status: 200 }
-        );
+        return NextResponse.json({
+            message: "Data acara berhasil diambil.",
+            status: true,
+            data: allEvents,
+        }, { status: 200 });
     } catch (err) {
         console.error("Error get data:", err);
         return NextResponse.json(

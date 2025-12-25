@@ -18,7 +18,7 @@ interface KegiatanFormData {
   divisi: string;
   tanggal: string;
   maps: string;
-   status: "Upcoming" | "Passed" | "Ongoing";
+  status: "Upcoming" | "Passed" | "Ongoing";
   deskripsi: string;
   jamMulai: string;
   jamSelesai: string;
@@ -229,7 +229,7 @@ export default function EditKegiatanPage({
     };
 
     fetchData();
-  }, []);
+  }, [id]);
 
   return (
     <DashboardSection className="w-full min-h-full p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-20 lg:gap-6">
@@ -355,11 +355,10 @@ export default function EditKegiatanPage({
                 type="submit"
                 disabled={!isFormValid}
                 aria-disabled={!isFormValid}
-                className={`text-white ${
-                  !isFormValid
+                className={`text-white ${!isFormValid
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-primary cursor-pointer hover:bg-primary-dark"
-                } rounded-lg px-4 py-2 font-semibold transition-colors`}
+                  } rounded-lg px-4 py-2 font-semibold transition-colors`}
               >
                 Update Kegiatan
               </button>

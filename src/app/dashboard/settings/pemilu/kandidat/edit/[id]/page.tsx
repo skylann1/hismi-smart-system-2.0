@@ -13,7 +13,8 @@ export default function EditPage() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const params = useParams();
-  const id = params.id;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _id = params.id;
 
   const [isLoading, setIsLoading] = useState(true); // Loading fetch data awal
   const [isSaving, setIsSaving] = useState(false); // Loading saat simpan

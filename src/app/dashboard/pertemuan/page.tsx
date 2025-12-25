@@ -51,6 +51,30 @@ const DaftarPertemuan = () => {
     [key: string]: unknown;
   };
 
+  const handleDelete = async (id: string | number) => {
+    if (!confirm("Apakah Anda yakin ingin menghapus pertemuan ini?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/api/pertemuan/delete?id=${id}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert("Pertemuan berhasil dihapus");
+        window.location.reload();
+      } else {
+        alert("Gagal menghapus pertemuan: " + result.message);
+      }
+    } catch (error) {
+      console.error("Error deleting pertemuan:", error);
+      alert("Terjadi kesalahan saat menghapus pertemuan");
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -77,7 +101,7 @@ const DaftarPertemuan = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [url]);
 
   return (
     <>
@@ -139,12 +163,12 @@ const DaftarPertemuan = () => {
               >
                 Edit
               </Link>
-              <Link
-                href={`pertemuan/delete/${pertemuan.id}`}
+              <button
+                onClick={() => handleDelete(pertemuan.id)}
                 className="font-medium text-red-600 hover:underline"
               >
                 Delete
-              </Link>
+              </button>
             </div>
           )}
         />

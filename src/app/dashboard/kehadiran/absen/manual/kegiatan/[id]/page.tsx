@@ -79,6 +79,7 @@ export default function AbsenManualPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const [fetchIsLoading, setFetchIsLoading] = useState(false);
   const params = useParams();
   const eventId = params.id as string;
   const [data, setData] = useState<AcaraAttendance | null>(null);
@@ -87,6 +88,7 @@ export default function AbsenManualPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setFetchIsLoading(true);
         const res = await fetch(
           `/dashboard/api/kehadiran?id=${eventId}&tipe=kegiatan`,
           {
@@ -122,6 +124,8 @@ export default function AbsenManualPage() {
         }
       } catch (err) {
         console.error("Error fetching data:", err);
+      } finally {
+        setFetchIsLoading(false);
       }
     };
 
@@ -209,6 +213,14 @@ export default function AbsenManualPage() {
       setIsLoading(false);
     }
   };
+
+  if (fetchIsLoading)
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+        <p className="mt-4 text-gray-500">Tunggu dulu yawww...</p>
+      </div>
+    );
 
   return (
     <div className="min-h-screen">

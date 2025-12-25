@@ -9,7 +9,7 @@ import {
 } from "react-icons/io5";
 import { BsCalendar2EventFill } from "react-icons/bs";
 import { IoIosPeople } from "react-icons/io";
-import { FaCartArrowDown, FaCartPlus } from "react-icons/fa";
+// import { FaCartArrowDown, FaCartPlus } from "react-icons/fa";
 import { inter } from "@/app/fonts";
 import Image from "next/image";
 import { useAppSelector } from "@/hooks/redux";
@@ -41,10 +41,10 @@ const MainDashboard = () => {
             resAllKegiatan.json(),
           ]);
 
-        setAnggota(anggotaJson.data);
-        setAcara(acaraJson.data);
-        setKegiatan(kegiatanJson.data);
-        setAllKegiatan(allKegiatanJson.data);
+        setAnggota(anggotaJson.data || []);
+        setAcara(acaraJson.data || []);
+        setKegiatan(kegiatanJson.data || []);
+        setAllKegiatan(allKegiatanJson.data || []);
       } catch {
         console.error("Oops something when wrong in the server.");
       }
@@ -65,7 +65,7 @@ const MainDashboard = () => {
   return (
     <div>
       <div className={`w-full flex flex-col min-h-screen ${inter.className}`}>
-        <div className="w-full flex flex-col md:flex-row rounded-xl bg-gradient-to-b from-violet-500 to-violet-900  px-4 md:px-8 pt-8 gap-16">
+        <div className={`w-full flex flex-col md:flex-row rounded-xl bg-linear-to-b from-violet-500 to-violet-900  px-4 md:px-8 pt-8 gap-16`}>
           <div className="w-full flex flex-col justify-start items-start text-white md:mb-6">
             <h1 className="text-3xl drop-shadow-xl uppercase font-bold">
               SELAMAT DATANG, <span>{user.nama || "Sobat HIMSI"}</span>
@@ -103,7 +103,7 @@ const MainDashboard = () => {
             <div className="flex flex-col min-h-full justify-between items-start py-1">
               <h3 className=" text-base opacity-90 font-semibold">Kegiatan</h3>
               <span className=" text-base opacity-90 font-semibold">
-                {kegiatan.length}
+                {kegiatan?.length || 0}
               </span>
             </div>
           </div>
@@ -114,7 +114,7 @@ const MainDashboard = () => {
             <div className="flex flex-col min-h-full justify-between items-start py-1">
               <h3 className="text-base opacity-90 font-semibold">Acara</h3>
               <span className=" text-base opacity-90 font-semibold">
-                {acara.length}
+                {acara?.length || 0}
               </span>
             </div>
           </div>
@@ -125,7 +125,7 @@ const MainDashboard = () => {
             <div className="flex flex-col min-h-full justify-between items-start py-1">
               <h3 className=" text-base opacity-90 font-semibold">Anggota</h3>
               <span className=" text-base opacity-90 font-semibold">
-                {anggota.length}
+                {anggota?.length || 0}
               </span>
             </div>
           </div>
@@ -204,7 +204,7 @@ const MainDashboard = () => {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row w-full gap-4 mt-6 h-[35rem] md:h-[26rem]">
+        <div className="flex flex-col md:flex-row w-full gap-4 mt-6 h-140 md:h-104">
           <div className="w-full md:w-[70%] h-full rounded-lg bg-white border border-gray-300 flex flex-col overflow-hidden">
             <div className="w-full bg-primary text-white p-4 flex justify-center">
               <span className="font-semibold text-base">Anggota Terbaru</span>
@@ -253,7 +253,7 @@ const MainDashboard = () => {
               </table>
             </div>
           </div>
-          
+
           <div className="w-full md:w-[30%] h-full">
             <div className="w-full h-fit md:h-1/2 bg-white border border-gray-300 rounded-xl flex flex-col justify-start items-center shadow">
               <div className="w-full border-b border-gray-300 p-4 md:p-3 flex justify-start items-center gap-2">

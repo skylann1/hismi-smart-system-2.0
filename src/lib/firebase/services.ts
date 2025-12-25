@@ -94,27 +94,59 @@ export async function addAnggota(data: {
   password?: string;
   access: string[];
 }, callback: (result: { success: boolean; message?: string }) => void) {
+  try {
+    const q = query(collection(firestore, "users"), where("email", "==", data.email));
+    const querySnapshot = await getDocs(q);
+    const existingData = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Array<{ id: string; email: string }>;
 
-  const q = query(collection(firestore, "users"), where("email", "==", data.email));
-  const querySnapshot = await getDocs(q);
-  const existingData = querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data()
-  })) as Array<{ id: string; email: string }>;
+    if (existingData.length > 0) {
+      callback({ success: false, message: "Email sudah terdaftar." });
+      return;
+    }
 
-  if (existingData.length > 0) {
-    callback({ success: false, message: "Email sudah terdaftar." });
-    return;
-  }
+    const defaultPassword = data.tanggal_lahir.replace(/-/g, "");
+    data.password = await bcrypt.hash(defaultPassword || "himsikaliabang", 10);
 
-  const defaultPassword = data.tanggal_lahir.replace(/-/g, "");
-  data.password = await bcrypt.hash(defaultPassword || "himsikaliabang", 10);
+    // Add the new user
+    const userDocRef = await addDoc(collection(firestore, "users"), data);
+    const userId = userDocRef.id;
 
-  await addDoc(collection(firestore, "users"), data).then(() => {
+    // Create absen entries for this new user in ALL existing events
+    const collections = ["pertemuan", "kegiatan", "proker"];
+    const absenPromises = [];
+
+    for (const colName of collections) {
+      const eventsSnapshot = await getDocs(collection(firestore, colName));
+
+      for (const eventDoc of eventsSnapshot.docs) {
+        const absenRef = doc(firestore, colName, eventDoc.id, "absen", userId);
+
+        absenPromises.push(
+          setDoc(absenRef, {
+            userId: userId,
+            nama: data.nama || "",
+            nim: data.nim || "-",
+            divisi: data.divisi || "-",
+            role: data.role || "anggota",
+            status: "absen",
+            email: data.email || "-",
+            no_hp: data.no_hp || "-",
+            imageUrl: data.imageUrl || "",
+            createdAt: new Date(),
+          })
+        );
+      }
+    }
+
+    await Promise.all(absenPromises);
+
     callback({ success: true, message: "Data anggota berhasil ditambahkan." });
-  }).catch((error) => {
-    callback({ success: false, message: error.message });
-  });
+  } catch (error) {
+    callback({ success: false, message: error instanceof Error ? error.message : "Unknown error" });
+  }
 }
 
 export async function addGuest(data: {
@@ -438,7 +470,7 @@ export async function addKegiatan(
 
     const q = query(
       collection(firestore, "kegiatan"),
-      where("nama", "==", data.judul),
+      where("judul", "==", data.judul),
       where("tanggal", "==", data.tanggal)
     );
     const existing = await getDocs(q);
@@ -481,14 +513,14 @@ export async function addKegiatan(
       absenPromises.push(
         setDoc(absenRef, {
           userId: userDoc.id,
-          nama: userData.nama,
-          nim: userData.nim,
-          divisi: userData.divisi,
-          role: userData.role,
+          nama: userData.nama || "",
+          nim: userData.nim || "-", // Fallback for optional field
+          divisi: userData.divisi || "-",
+          role: userData.role || "anggota",
           status: "absen",
-          email: userData.email,
-          no_hp: userData.no_hp,
-          imageUrl: userData.imageUrl,
+          email: userData.email || "-",
+          no_hp: userData.no_hp || "-",
+          imageUrl: userData.imageUrl || "",
           createdAt: new Date(),
         })
       );
@@ -594,33 +626,6 @@ export async function updateAbsen(eventId: string, absenList: AttendanceUpdate[]
   }
 }
 
-export async function getAbsenByNim(
-  collectionName: string,
-  kegiatanId: string,
-  nim: string
-) {
-  try {
-    const absenRef = collection(firestore, collectionName, kegiatanId, "absen");
-    const q = query(absenRef, where("nim", "==", nim));
-    const snapshot = await getDocs(q);
-
-    if (snapshot.empty) {
-      return { success: false, message: "Data absen anggota tidak ditemukan." };
-    }
-
-    const absenData = snapshot.docs[0].data();
-    const absenId = snapshot.docs[0].id;
-
-    return {
-      success: true,
-      data: { id: absenId, ...absenData },
-    };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (err: any) {
-    console.error("Error getAbsenByNim:", err);
-    return { success: false, message: err.message };
-  }
-}
 
 export async function getAllAbsenFromAllCollections() {
   try {
@@ -799,11 +804,48 @@ export async function getPaslonById(id: string) {
 export async function deletePaslon(id: string) {
   try {
     await deleteDoc(doc(firestore, "paslon", id));
-    return { success: true };
-  } catch {
-    return { success: false, message: "Gagal hapus data database" };
+    return { success: true, message: "Berhasil hapus data" };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_err) {
+    return { success: false, message: "Gagal hapus data" };
   }
 }
+
+export async function getUpcomingEvents() {
+  try {
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+    const collections = ["pertemuan", "kegiatan", "proker"];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let allEvents: any[] = [];
+
+    for (const colName of collections) {
+      const q = query(
+        collection(firestore, colName),
+        where("tanggal", ">=", today)
+      );
+      const snapshot = await getDocs(q);
+      const docs = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          type: colName.charAt(0).toUpperCase() + colName.slice(1), // Capitalize type
+          sourceCollection: colName
+        };
+      });
+      allEvents = [...allEvents, ...docs];
+    }
+
+    // Sort by date ascending
+    allEvents.sort((a, b) => new Date(a.tanggal).getTime() - new Date(b.tanggal).getTime());
+
+    return { success: true, data: allEvents };
+  } catch (error) {
+    console.error("Error fetching upcoming events:", error);
+    return { success: false, message: "Gagal mengambil data jadwal mendatang" };
+  }
+}
+
 
 // edit paslon 
 export async function updatePaslon(id: string, data: Partial<PaslonType>) {
@@ -1021,7 +1063,8 @@ export async function getNotulensi() {
       ...doc.data(),
     }));
     return { success: true, data };
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_error) {
     return { success: false, message: "Gagal mengambil data notulensi" };
   }
 }
@@ -1031,7 +1074,147 @@ export async function updateNotulensi(id: string, data: Partial<NotulensiFormDat
     const docRef = doc(firestore, "notulensi", id);
     await updateDoc(docRef, { ...data, updatedAt: new Date() });
     return { success: true };
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_error) {
     return { success: false, message: "Gagal update notulensi" };
+  }
+}
+
+// Delete functions
+export async function deleteKegiatan(id: string) {
+  try {
+    await deleteDoc(doc(firestore, "kegiatan", id));
+    return { success: true, message: "Kegiatan berhasil dihapus" };
+  } catch (error) {
+    console.error("Error deleting kegiatan:", error);
+    return { success: false, message: "Gagal menghapus kegiatan" };
+  }
+}
+
+export async function deletePertemuan(id: string) {
+  try {
+    await deleteDoc(doc(firestore, "pertemuan", id));
+    return { success: true, message: "Pertemuan berhasil dihapus" };
+  } catch (error) {
+    console.error("Error deleting pertemuan:", error);
+    return { success: false, message: "Gagal menghapus pertemuan" };
+  }
+}
+
+export async function deleteProker(id: string) {
+  try {
+    await deleteDoc(doc(firestore, "proker", id));
+    return { success: true, message: "Proker berhasil dihapus" };
+  } catch (error) {
+    console.error("Error deleting proker:", error);
+    return { success: false, message: "Gagal menghapus proker" };
+  }
+}
+
+export async function deleteUser(id: string) {
+  try {
+    // First, delete all absen records for this user from all events
+    const collections = ["pertemuan", "kegiatan", "proker"];
+    const deletePromises = [];
+
+    for (const colName of collections) {
+      const eventsSnapshot = await getDocs(collection(firestore, colName));
+
+      for (const eventDoc of eventsSnapshot.docs) {
+        const absenRef = doc(firestore, colName, eventDoc.id, "absen", id);
+        deletePromises.push(deleteDoc(absenRef));
+      }
+    }
+
+    // Wait for all absen deletions to complete
+    await Promise.all(deletePromises);
+
+    // Then delete the user document
+    await deleteDoc(doc(firestore, "users", id));
+
+    return { success: true, message: "Anggota berhasil dihapus" };
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return { success: false, message: "Gagal menghapus anggota" };
+  }
+}
+
+// QR Code Attendance Functions
+export async function getAbsenByNim(eventId: string, collectionType: string, nim: string) {
+  try {
+    console.log("getAbsenByNim called with:", { eventId, collectionType, nim });
+
+    // IMPORTANT: Parameter names are misleading!
+    // We receive: getAbsenByNim(tipe, id, nim) 
+    // But params are named: (eventId, collectionType, nim)
+    // So eventId is actually the type, and collectionType is actually the ID
+    // Swap them to use correctly:
+    const actualType = eventId;      // e.g., "pertemuan"  
+    const actualId = collectionType;  // e.g., "grCtwroef7HlmcxTNI5M"
+
+    console.log("Corrected values:", { actualType, actualId, nim });
+
+    // Get all absen documents from the event
+    const absenSnapshot = await getDocs(collection(firestore, actualType, actualId, "absen"));
+    console.log(`Found ${absenSnapshot.docs.length} attendance records`);
+
+    // Find the user by NIM
+    const userAbsen = absenSnapshot.docs.find(doc => {
+      const data = doc.data();
+      return data.nim === nim;
+    });
+
+    if (!userAbsen) {
+      console.log("User not found with NIM:", nim);
+      return { success: false, message: "User dengan NIM tersebut tidak ditemukan" };
+    }
+
+    const userData = {
+      id: userAbsen.id,
+      ...userAbsen.data()
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    console.log("User found:", { id: userData.id, nama: (userData as any).nama, nim: (userData as any).nim });
+
+    return {
+      success: true,
+      data: userData
+    };
+  } catch (error) {
+    console.error("Error getting absen by NIM:", error);
+    return { success: false, message: "Gagal mengambil data absensi" };
+  }
+}
+
+export async function updateAbsenStatus(eventId: string, collectionType: string, userId: string, status: string) {
+  try {
+    console.log("updateAbsenStatus called with:", { eventId, collectionType, userId, status });
+
+    const absenRef = doc(firestore, collectionType, eventId, "absen", userId);
+    console.log("Document path:", absenRef.path);
+
+    // Use setDoc with merge:true instead of updateDoc
+    // This will create the document if it doesn't exist, or update if it does
+    await setDoc(absenRef, {
+      status: status,
+      updatedAt: new Date(),
+    }, { merge: true });
+
+    console.log("Attendance status updated successfully");
+    return { success: true, message: "Status absensi berhasil diupdate" };
+  } catch (error) {
+    console.error("Error updating absen status:", error);
+    console.error("Error details:", {
+      eventId,
+      collectionType,
+      userId,
+      status,
+      errorMessage: error instanceof Error ? error.message : String(error)
+    });
+    return {
+      success: false,
+      message: `Gagal mengupdate status absensi: ${error instanceof Error ? error.message : 'Unknown error'}`
+    };
   }
 }

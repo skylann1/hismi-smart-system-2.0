@@ -51,7 +51,7 @@ const ListArtikel = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [url]);
 
   return (
     <>

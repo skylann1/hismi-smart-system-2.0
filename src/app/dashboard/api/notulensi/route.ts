@@ -20,7 +20,8 @@ export async function POST(req: NextRequest) {
         } else {
             return NextResponse.json({ success: false, message: result.message }, { status: 500 });
         }
-    } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_error) {
         return NextResponse.json({ success: false, message: "Invalid request body" }, { status: 400 });
     }
 }

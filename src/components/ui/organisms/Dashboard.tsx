@@ -9,13 +9,13 @@ import { FaBarsProgress } from "react-icons/fa6";
 import { MdConnectWithoutContact } from "react-icons/md";
 import { FaAddressBook, FaBusinessTime } from "react-icons/fa";
 import Image from "next/image";
-import { inter } from "@/app/fonts";
 import { FaAssistiveListeningSystems } from "react-icons/fa";
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import { useAppDispatch } from "@/hooks/redux";
 import { ROLES, hasAccess } from "@/lib/roles";
 import { FaPersonDotsFromLine } from "react-icons/fa6";
+import { SiSmart } from "react-icons/si";
 
 type DashboardPropsType = {
   children: React.ReactNode[] | React.ReactElement[];
@@ -55,7 +55,7 @@ export default function Dashboard({ children }: DashboardPropsType) {
     };
 
     getDataUser();
-  }, [session]);
+  }, [session, dispacth, user]);
 
   const [isOpen, setIsOpen] = useState(false);
   const [sideBar, setSideBar] = useState(false);
@@ -150,12 +150,11 @@ export default function Dashboard({ children }: DashboardPropsType) {
                   ></path>
                 </svg>
               </button>
-              <div className="flex justify-center items-center">
-                <span
-                  className={`${inter.className} text-sm font-normal opacity-80 hidden md:block`}
-                >
-                  Himpunan Mahasiswa Sistem Informasi
-                </span>
+              <div className="md:flex justify-center items-center hidden">
+                <div className="flex items-center space-x-3">
+                  <SiSmart className="h-8 w-8 text-indigo-600" />
+                  <span className="text-lg font-extrabold text-gray-900">SMART SYSTEMS</span>
+                </div>
               </div>
             </div>
 
@@ -222,12 +221,12 @@ export default function Dashboard({ children }: DashboardPropsType) {
 
       <aside
         id="overlay-sidebar"
-        className={`fixed top-0 left-0 z-40 w-full sm:w-64 h-screen pt-14 transition-transform bg-opacity-10 bg-white sm:-translate-x-0 shadow-right ${sideBar ? "-translate-x-0" : "-translate-x-full"
+        className={`fixed top-0 left-0 z-40 w-full sm:w-64 h-screen pt-14 transition-transform  bg-black/30 sm:-translate-x-0 shadow-right ${sideBar ? "-translate-x-0" : "-translate-x-full"
           }`}
         aria-label="Sidebar"
         onClick={(e) => handleClickOutside(e)}
       >
-        <div className="w-64 h-full px-3 pb-4 overflow-y-auto pt-6">
+        <div className="w-64 h-full px-3 pb-4 overflow-y-auto pt-6 bg-white">
           <ul className="space-y-2 font-medium">
             {
               !userRoles.includes(ROLES.GUEST) && (
@@ -929,7 +928,7 @@ export default function Dashboard({ children }: DashboardPropsType) {
               })}
           </span>
         </div>
-        <div className="p-4">{children}</div>
+        <div className="p-4 overflow-y-auto">{children}</div>
       </div>
     </>
   );

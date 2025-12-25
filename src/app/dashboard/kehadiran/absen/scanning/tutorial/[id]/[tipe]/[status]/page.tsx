@@ -4,7 +4,6 @@ import Image from "next/image";
 import { FaLongArrowAltLeft } from "react-icons/fa";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import ModalSecondary from "@/components/ui/templates/modal/ModalSecondary";
 import { redirect } from "next/navigation";
 import { RiAlarmWarningFill } from "react-icons/ri";
 
@@ -23,21 +22,21 @@ export default function Page() {
       {status !== "Ongoing" ? (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 overflow-hidden">
           <div className="bg-gray-200/90 p-2 rounded-lg">
-          <div className="bg-white p-6 flex flex-col items-center justify-center relative md:max-w-96 rounded-lg">
-            <RiAlarmWarningFill className="text-5xl text-red-600/70"/>
-            <div className="flex flex-col items-center mt-6">
-              <h1 className="text-lg font-bold">Oops!</h1>
-              <p className="text-[13px] font-semibold opacity-80 text-center">Event tidak sedang berlangsung, kamu hanya dapat mengakses fitur scan QR Code untuk absensi ketika event sedang berlangsung. Jika ada kesalahan input absensi silahkan gunakan absensi manual dan jika ada kendala teknis silahkan hubungi divisi pendidikan.</p>
+            <div className="bg-white p-6 flex flex-col items-center justify-center relative md:max-w-96 rounded-lg">
+              <RiAlarmWarningFill className="text-5xl text-red-600/70" />
+              <div className="flex flex-col items-center mt-6">
+                <h1 className="text-lg font-bold">Oops!</h1>
+                <p className="text-[13px] font-semibold opacity-80 text-center">Event tidak sedang berlangsung, kamu hanya dapat mengakses fitur scan QR Code untuk absensi ketika event sedang berlangsung. Jika ada kesalahan input absensi silahkan gunakan absensi manual dan jika ada kendala teknis silahkan hubungi divisi pendidikan.</p>
+              </div>
+              <div className="mt-6 w-full flex justify-end">
+                <button
+                  onClick={handleRedirect}
+                  className="bg-blue-600 text-white py-2 px-4 rounded-lg cursor-pointer"
+                >
+                  Kembali
+                </button>
+              </div>
             </div>
-            <div className="mt-6 w-full flex justify-end">
-              <button
-                onClick={handleRedirect}
-                className="bg-blue-600 text-white py-2 px-4 rounded-lg cursor-pointer"
-              >
-                Kembali
-              </button>
-            </div>
-          </div>
           </div>
         </div>
       ) : (
@@ -118,7 +117,7 @@ export default function Page() {
                 </span>
                 <div className="mt-8 flex items-center justify-between w-full">
                   <Link
-                    href={`/dashboard/kehadiran/absen/scanning/qrcode/${id}`}
+                    href={`/dashboard/kehadiran/absen/scanning/qrcode/${id}?tipe=${tipe}`}
                     className="bg-blue-600 text-white py-2 px-4 rounded-lg cursor-pointer"
                   >
                     Start scan

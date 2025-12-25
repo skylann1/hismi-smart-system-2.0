@@ -36,8 +36,6 @@ export default function withAuth(
         return NextResponse.redirect(url);
       }
 
-      // Role Based Access Control
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const userRoles = (token.access as string[]) || [];
 
       // God mode check

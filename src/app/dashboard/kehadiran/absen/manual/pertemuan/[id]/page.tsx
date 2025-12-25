@@ -9,6 +9,8 @@ import { useParams } from "next/navigation";
 import { useAppDispatch } from "@/hooks/redux";
 import { alertIsAktif } from "@/features/alert/alertSlice";
 import { useRouter } from "next/navigation";
+import { exportToExcel, formatStatusForExcel } from "@/lib/excelExport";
+import { HiDownload } from "react-icons/hi";
 
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "absen";
 
@@ -35,9 +37,8 @@ const StatusSelector = ({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value as AttendanceStatus)}
-      className={`rounded-lg border px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-        statusConfig[value]?.colorClass ?? "bg-gray-100"
-      } text-white`}
+      className={`rounded-lg border px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${statusConfig[value]?.colorClass ?? "bg-gray-100"
+        } text-white`}
     >
       {allStatuses.map((statusKey) => (
         <option key={statusKey} value={statusKey}>
@@ -210,6 +211,42 @@ export default function AbsenManualPage() {
     }
   };
 
+  const handleDownloadExcel = () => {
+    if (!data || attendanceList.length === 0) {
+      alert("Tidak ada data untuk diunduh");
+      return;
+    }
+
+    // Prepare Excel data
+    const excelData = attendanceList.map((member, index) => ({
+      no: index + 1,
+      nim: member.nim || "-",
+      nama: member.nama,
+      divisi: member.divisi,
+      role: member.role,
+      email: member.email || "-",
+      no_hp: member.no_hp || "-",
+      status: formatStatusForExcel(member.status),
+    }));
+
+    // Export to Excel
+    exportToExcel({
+      filename: `Absensi_${data.judul}_${data.tanggal}`.replace(/[/\\?%*:|"<>]/g, '-'),
+      sheetName: 'Daftar Hadir',
+      columns: [
+        { header: 'No', key: 'no', width: 5 },
+        { header: 'NIM', key: 'nim', width: 12 },
+        { header: 'Nama', key: 'nama', width: 25 },
+        { header: 'Divisi', key: 'divisi', width: 20 },
+        { header: 'Jabatan', key: 'role', width: 15 },
+        { header: 'Email', key: 'email', width: 25 },
+        { header: 'No. HP', key: 'no_hp', width: 15 },
+        { header: 'Status', key: 'status', width: 12 },
+      ],
+      data: excelData,
+    });
+  };
+
   return (
     <div className="min-h-screen">
       <ReusableTable
@@ -219,14 +256,22 @@ export default function AbsenManualPage() {
         data={processedData}
       />
 
-      <div className="mt-6 flex justify-end">
+      <div className="mt-6 flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={handleDownloadExcel}
+          disabled={!data || attendanceList.length === 0}
+          className="flex items-center gap-2 rounded-lg bg-green-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <HiDownload className="text-lg" />
+          Download Excel
+        </button>
         <button
           disabled={isLoading}
           type="button"
           onClick={handleSave}
-          className={`rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 ${
-            isLoading && "opacity-50 cursor-not-allowed"
-          }`}
+          className={`rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 ${isLoading && "opacity-50 cursor-not-allowed"
+            }`}
         >
           {isLoading ? "Loading..." : "Simpan Perubahan"}
         </button>

@@ -42,7 +42,7 @@ export default function VotesMonitoringPage() {
 
             if (json.success) {
                 // Sort paslon by nomor urut
-                const sortedSummary = json.summary.sort((a: any, b: any) => a.nomor_urut - b.nomor_urut);
+                const sortedSummary = json.summary.sort((a: SummaryType, b: SummaryType) => a.nomor_urut - b.nomor_urut);
                 setSummary(sortedSummary);
                 setTotalVotes(json.totalVotes);
                 setRecentVotes(json.recentVotes);

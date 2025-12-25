@@ -1,8 +1,6 @@
 "use client";
 
 import ComingSoon from "@/components/ui/templates/CommingSoon";
-import Image from "next/image";
-import Link from "next/link";
 
 export default function Page() {
   return (

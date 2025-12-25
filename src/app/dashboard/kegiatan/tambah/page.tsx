@@ -135,47 +135,53 @@ export default function TambahKegiatanPage() {
     setIsFormValid(!isDataMissing && !isErrorPresent);
   }, [formData, errors]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isFormValid) {
+      alert("Masih ada data yang belum valid bro 🚫");
+      return;
+    }
+
     try {
-      if (isFormValid) {
-        const submitData = async () => {
-          const response = await fetch(url, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          });
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-          const data = await response.json();
+      const data = await response.json();
+      console.log("Response from server:", data);
 
-          if (!response.ok) {
-            dispatch(
-              alertIsAktif({
-                status: false,
-                title: "Error! Gagal menyimpan data ke sistem.",
-                message: data.message,
-              })
-            );
-            throw new Error("Network response was not ok");
-          }
-          dispatch(
-            alertIsAktif({
-              status: true,
-              title: "Success! Yes berhasil nih simpan data ke system.",
-              message: data.message,
-            })
-          );
-          router.push("/dashboard/kegiatan");
-        };
-
-        submitData();
-      } else {
-        alert("Masih ada data yang belum valid bro 🚫");
+      if (!response.ok) {
+        dispatch(
+          alertIsAktif({
+            status: false,
+            title: "Error! Gagal menyimpan data ke sistem.",
+            message: data.message,
+          })
+        );
+        return;
       }
+
+      dispatch(
+        alertIsAktif({
+          status: true,
+          title: "Success! Yes berhasil nih simpan data ke system.",
+          message: data.message,
+        })
+      );
+      router.push("/dashboard/kegiatan");
     } catch (error) {
       console.error("Error submitting form:", error);
+      dispatch(
+        alertIsAktif({
+          status: false,
+          title: "Error!",
+          message: "Terjadi kesalahan saat menghubungi server.",
+        })
+      );
     } finally {
       setFormData({
         judul: "",
@@ -198,7 +204,7 @@ export default function TambahKegiatanPage() {
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
           Tambah Kegiatan Baru
         </h2>
-        <span className="text-sm font-[400] text-gray-500 leading-relaxed">
+        <span className="text-sm text-gray-500 leading-relaxed">
           Buat jadwal kegiatan baru. Pastikan semua informasi seperti divisi
           penyelenggara, lokasi, dan tanggal pelaksanaan sudah benar.
         </span>
@@ -310,11 +316,10 @@ export default function TambahKegiatanPage() {
               type="submit"
               disabled={!isFormValid}
               aria-disabled={!isFormValid}
-              className={`text-white ${
-                !isFormValid
+              className={`text-white ${!isFormValid
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-primary cursor-pointer hover:bg-primary-dark"
-              } rounded-lg px-4 py-2 font-semibold transition-colors`}
+                } rounded-lg px-4 py-2 font-semibold transition-colors`}
             >
               Tambah Kegiatan
             </button>

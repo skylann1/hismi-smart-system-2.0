@@ -1,4 +1,4 @@
-import { NextAuthOptions, User } from "next-auth";
+import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import NextAuth from "next-auth/next";
 import { login } from "@/lib/firebase/services";
@@ -52,7 +52,7 @@ const authOptions: NextAuthOptions = {
         })
     ],
     callbacks: {
-        async jwt({ token, account, profile, user }) {
+        async jwt({ token, account, user }) {
             if (account?.provider === "credentials") {
                 token.email = user?.email;
                 token.name = user?.name;

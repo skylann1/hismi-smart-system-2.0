@@ -8,6 +8,6 @@ export default function Home() {
   const router = useRouter();
   useEffect(() => {
     router.push("/introduction")
-  }, [])
+  }, [router])
   return null;
 }

@@ -67,8 +67,8 @@ export default function Page() {
       if (!res.ok) throw new Error(json.message);
 
       router.push("/dashboard/notulensi");
-    } catch (error: any) {
-      alert(error.message || "Gagal menyimpan notulensi");
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Gagal menyimpan notulensi");
     } finally {
       setIsSubmitting(false);
     }

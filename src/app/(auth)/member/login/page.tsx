@@ -1,8 +1,7 @@
 "use client";
 
+import { useState, ChangeEvent, FormEvent } from "react";
 import { bungee, inter } from "@/app/fonts";
-import { useState, FormEvent, ChangeEvent } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { RiLockPasswordFill } from "react-icons/ri";
 import { MdEmail } from "react-icons/md";
@@ -188,9 +187,8 @@ export default function LoginPage() {
             {/* Input Email */}
             <label
               htmlFor="email"
-              className={`block mb-1 text-sm font-medium ${
-                errors.email ? "text-red-500" : "text-gray-800"
-              }`}
+              className={`block mb-1 text-sm font-medium ${errors.email ? "text-red-500" : "text-gray-800"
+                }`}
             >
               Email
             </label>
@@ -204,9 +202,8 @@ export default function LoginPage() {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className={`bg-gray-50 border text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 ${
-                  errors.email ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`bg-gray-50 border text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 ${errors.email ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder="Masukan Email"
               />
             </div>
@@ -217,9 +214,8 @@ export default function LoginPage() {
             {/* Input Password */}
             <label
               htmlFor="password"
-              className={`block mb-1 text-sm font-medium mt-4 ${
-                errors.password ? "text-red-500" : "text-gray-800"
-              }`}
+              className={`block mb-1 text-sm font-medium mt-4 ${errors.password ? "text-red-500" : "text-gray-800"
+                }`}
             >
               Password
             </label>
@@ -233,9 +229,8 @@ export default function LoginPage() {
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className={`bg-gray-50 border text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 ${
-                  errors.password ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`bg-gray-50 border text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 ${errors.password ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder="********"
               />
             </div>
@@ -248,11 +243,10 @@ export default function LoginPage() {
             {/* Tombol Login */}
             <button
               className={`w-full mt-6 bg-primary text-white py-2 font-semibold text-sm rounded-md 
-    ${
-      isLoading || Object.keys(errors).length > 0
-        ? "opacity-50 cursor-not-allowed"
-        : "opacity-100"
-    }
+    ${isLoading || Object.keys(errors).length > 0
+                  ? "opacity-50 cursor-not-allowed"
+                  : "opacity-100"
+                }
   `}
               type="submit"
               disabled={isLoading || Object.keys(errors).length > 0}
@@ -260,15 +254,7 @@ export default function LoginPage() {
               {isLoading ? "Processing..." : "LOGIN"}
             </button>
 
-            <div className="w-full justify-center items-center text-center font-medium text-sm mt-2 opacity-90">
-              Dont have an account?{" "}
-              <Link
-                href="/guest/register"
-                className="text-sky-800 underline underline-offset-1"
-              >
-                Register
-              </Link>
-            </div>
+
           </form>
         </div>
       </div>

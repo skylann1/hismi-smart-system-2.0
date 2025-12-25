@@ -220,26 +220,26 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       });
 
       const result = await res.json();
-        if (!result.success) {
-          dispatch(
-            alertIsAktif({
-              status: false,
-              title:
-                "Opps! Sorry banget nih, belum dapet kesimpan ke dalam system.",
-              message: result.message,
-            })
-          );
-        }
-
+      if (!result.success) {
         dispatch(
           alertIsAktif({
-            status: true,
-            title: "Success! Yes berhasil nih update data.",
+            status: false,
+            title:
+              "Opps! Sorry banget nih, belum dapet kesimpan ke dalam system.",
             message: result.message,
           })
         );
+      }
+
+      dispatch(
+        alertIsAktif({
+          status: true,
+          title: "Success! Yes berhasil nih update data.",
+          message: result.message,
+        })
+      );
       setIsLoading(false);
-        router.push("/dashboard/publikasi/artikel");
+      router.push("/dashboard/publikasi/artikel");
     } catch (err) {
       console.error("oops", err);
     }
@@ -272,7 +272,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     };
 
     tryToFetchData();
-  }, []);
+  }, [id, url]);
 
   useEffect(() => {
     const isInformasiInvalid =
@@ -330,11 +330,10 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         >
           {/* Step 1: Informasi Artikel */}
           <div
-            className={`flex flex-col transition-all duration-300 ease-in-out ${
-              formStep !== "informasi"
+            className={`flex flex-col transition-all duration-300 ease-in-out ${formStep !== "informasi"
                 ? "opacity-0 pointer-events-none absolute"
                 : "opacity-100"
-            }`}
+              }`}
           >
             <h2 className="text-xl font-semibold text-gray-800">
               Langkah 1: Informasi Artikel
@@ -410,11 +409,10 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   type="button"
                   disabled={formInputIsValid[0]}
                   onClick={() => setFormStep("konten")}
-                  className={`text-white ${
-                    formInputIsValid[0]
+                  className={`text-white ${formInputIsValid[0]
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-primary cursor-pointer"
-                  } rounded-lg px-4 py-2`}
+                    } rounded-lg px-4 py-2`}
                 >
                   Berikutnya
                 </button>
@@ -424,11 +422,10 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
           {/* Step 2: Konten Artikel */}
           <div
-            className={`flex flex-col transition-all duration-300 ease-in-out ${
-              formStep !== "konten"
+            className={`flex flex-col transition-all duration-300 ease-in-out ${formStep !== "konten"
                 ? "opacity-0 pointer-events-none absolute"
                 : "opacity-100"
-            }`}
+              }`}
           >
             <h2 className="text-xl font-semibold text-gray-800">
               Langkah 2: Konten Artikel
@@ -475,11 +472,10 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   type="button"
                   disabled={formInputIsValid[1]}
                   onClick={() => setFormStep("gambar_tambahan")}
-                  className={`text-white ${
-                    formInputIsValid[1]
+                  className={`text-white ${formInputIsValid[1]
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-primary cursor-pointer"
-                  } rounded-lg px-4 py-2`}
+                    } rounded-lg px-4 py-2`}
                 >
                   Berikutnya
                 </button>
@@ -488,11 +484,10 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           </div>
 
           <div
-            className={`flex flex-col transition-all duration-300 ease-in-out ${
-              formStep !== "gambar_tambahan"
+            className={`flex flex-col transition-all duration-300 ease-in-out ${formStep !== "gambar_tambahan"
                 ? "opacity-0 pointer-events-none absolute"
                 : "opacity-100"
-            }`}
+              }`}
           >
             <h2 className="text-xl font-semibold text-gray-800">
               Langkah 3: Gambar Tambahan
@@ -524,11 +519,10 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                 <button
                   type="submit"
                   disabled={formInputIsValid[2] || isLoading}
-                  className={`text-white ${
-                    formInputIsValid[2] || isLoading
+                  className={`text-white ${formInputIsValid[2] || isLoading
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-primary cursor-pointer"
-                  } rounded-lg px-4 py-2`}
+                    } rounded-lg px-4 py-2`}
                 >
                   {isLoading ? "submiting..." : "submit"}
                 </button>

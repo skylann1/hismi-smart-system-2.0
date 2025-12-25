@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { 
+import {
     FaInstagram,
     FaTiktok,
 
@@ -18,7 +18,7 @@ const GuestFooter = () => {
                         <li><Link href="/" className="font-semibold text-[13px] uppercase opacity-75">universitas</Link></li>
                         <li><Link href="/" className="font-semibold text-[13px] uppercase opacity-75">more</Link></li>
                     </ul>
-                    <hr className="h-[1px] w-full max-sm:block hidden"/>
+                    <hr className="h-[1px] w-full max-sm:block hidden" />
                     <div className="flex gap-8 max-sm:flex-col max-sm:gap-2">
                         <span>
                             <span className="text-white text-base">help</span>
@@ -45,27 +45,27 @@ const GuestFooter = () => {
                     <ul className="flex gap-4">
                         <li className="p-1 rounded-full bg-slate-400 hover:bg-slate-100">
                             <a href="https://www.instagram.com/himsi.kaliabang">
-                                <FaInstagram className="w-[20px] h-[20px] text-slate-900"/>
+                                <FaInstagram className="w-[20px] h-[20px] text-slate-900" />
                             </a>
                         </li>
                         <li className="p-1 rounded-full bg-slate-400 hover:bg-slate-100">
                             <a href="https://www.tiktok.com/@himsi_ubsikaliabang">
-                                <FaTiktok className="w-[20px] h-[20px] text-slate-900"/>
+                                <FaTiktok className="w-[20px] h-[20px] text-slate-900" />
                             </a>
                         </li>
                         <li className="p-1 rounded-full bg-slate-400 hover:bg-slate-100">
                             <a href="mailto:himsi.ubsikaliabang@gmail.com">
-                                <MdEmail className="w-[20px] h-[20px] text-slate-900"/>
+                                <MdEmail className="w-[20px] h-[20px] text-slate-900" />
                             </a>
                         </li>
                     </ul>
                 </div>
             </div>
-            
+
             <div className="flex justify-between items-start max-sm:flex-col max-sm:gap-4">
                 <div className="flex gap-12 items-center max-sm:flex-col max-sm:gap-2 max-sm:items-start">
                     <div className="flex capitalize justify-center items-center">
-                        <img src="./icons/mark.png" alt="" className="w-[20px]"/>
+                        <img src="./icons/mark.png" alt="" className="w-[20px]" />
                         <p className="text-xs text-slate-400 font-bold">kaliabang</p>
                     </div>
                     <p className="text-slate-400 text-xs font-semibold">

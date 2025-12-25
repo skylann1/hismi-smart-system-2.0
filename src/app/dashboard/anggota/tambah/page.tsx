@@ -29,6 +29,16 @@ interface formData {
 type formInputIsValidType = [boolean, boolean, boolean];
 const formInputConcept = ["umum", "akademik", "himsi"];
 
+const ROLE_OPTIONS = [
+  { value: "anggota", label: "Anggota" },
+  { value: "koordinator", label: "Koordinator" },
+  { value: "wakil-koordinator", label: "Wakil Koordinator" },
+  { value: "ketua", label: "Ketua" },
+  { value: "wakil-ketua", label: "Wakil Ketua" },
+  { value: "sekretaris", label: "Sekretaris" },
+  { value: "bendahara", label: "Bendahara" },
+];
+
 export default function Page() {
   const dispatch = useAppDispatch();
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -190,31 +200,23 @@ export default function Page() {
     { value: "bph", label: "BPH" },
   ];
 
-  const role = [
-    { value: "anggota", label: "Anggota" },
-    { value: "koordinator", label: "Koordinator" },
-    { value: "wakil-koordinator", label: "Wakil Koordinator" },
-    { value: "ketua", label: "Ketua" },
-    { value: "wakil-ketua", label: "Wakil Ketua" },
-    { value: "sekretaris", label: "Sekretaris" },
-    { value: "bendahara", label: "Bendahara" },
-  ];
+
 
   const filteredRoles = useMemo(() => {
     if (formData.divisi !== "bph") {
-      return role.filter((r) =>
+      return ROLE_OPTIONS.filter((r) =>
         ["anggota", "koordinator", "wakil-koordinator"].includes(
           r.value.toLowerCase()
         )
       );
     } else {
-      return role.filter((r) =>
+      return ROLE_OPTIONS.filter((r) =>
         ["ketua", "wakil-ketua", "sekretaris", "bendahara"].includes(
           r.value.toLowerCase()
         )
       );
     }
-  }, [formData.divisi, errors]);
+  }, [formData.divisi]);
 
   useEffect(() => {
     const isGeneralInvalid =
@@ -368,11 +370,10 @@ export default function Page() {
       >
         {/* Informasi Umum */}
         <div
-          className={`w-full flex flex-col transition-all duration-300 ease-in-out ${
-            formInput !== "umum"
-              ? "opacity-0 pointer-events-none absolute"
-              : "opacity-100"
-          }`}
+          className={`w-full flex flex-col transition-all duration-300 ease-in-out ${formInput !== "umum"
+            ? "opacity-0 pointer-events-none absolute"
+            : "opacity-100"
+            }`}
         >
           <h2 className="text-xl font-semibold text-gray-800">
             Informasi Umum
@@ -421,11 +422,10 @@ export default function Page() {
                 type="button"
                 disabled={formInputIsValid[0]}
                 aria-disabled={formInputIsValid[0]}
-                className={`text-white ${
-                  formInputIsValid[0]
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-primary cursor-pointer"
-                } rounded-lg px-3 py-1`}
+                className={`text-white ${formInputIsValid[0]
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-primary cursor-pointer"
+                  } rounded-lg px-3 py-1`}
                 onClick={() => setFormInput("akademik")}
               >
                 Berikutnya
@@ -436,11 +436,10 @@ export default function Page() {
 
         {/* Informasi Akademik */}
         <div
-          className={`w-full flex flex-col transition-all duration-300 ease-in-out ${
-            formInput !== "akademik"
-              ? "opacity-0 pointer-events-none absolute"
-              : "opacity-100"
-          }`}
+          className={`w-full flex flex-col transition-all duration-300 ease-in-out ${formInput !== "akademik"
+            ? "opacity-0 pointer-events-none absolute"
+            : "opacity-100"
+            }`}
         >
           <h2 className="text-xl font-semibold text-gray-800">
             Informasi Akademik
@@ -513,11 +512,10 @@ export default function Page() {
                 type="button"
                 disabled={formInputIsValid[1]}
                 aria-disabled={formInputIsValid[1]}
-                className={`text-white ${
-                  formInputIsValid[1]
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-primary cursor-pointer"
-                } rounded-lg px-3 py-1`}
+                className={`text-white ${formInputIsValid[1]
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-primary cursor-pointer"
+                  } rounded-lg px-3 py-1`}
                 onClick={() => setFormInput("himsi")}
               >
                 Berikutnya
@@ -528,11 +526,10 @@ export default function Page() {
 
         {/* Informasi HIMSI */}
         <div
-          className={`w-full flex flex-col transition-all duration-300 ease-in-out ${
-            formInput !== "himsi"
-              ? "opacity-0 pointer-events-none absolute"
-              : "opacity-100"
-          }`}
+          className={`w-full flex flex-col transition-all duration-300 ease-in-out ${formInput !== "himsi"
+            ? "opacity-0 pointer-events-none absolute"
+            : "opacity-100"
+            }`}
         >
           <h2 className="text-xl font-semibold text-gray-800">
             Informasi keanggotaan HIMSI
@@ -581,13 +578,12 @@ export default function Page() {
                 type="submit"
                 disabled={formInputIsValid[2] || submitLoading}
                 aria-disabled={formInputIsValid[2] || submitLoading}
-                className={`text-white ${
-                  formInputIsValid[2] || submitLoading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-primary cursor-pointer"
-                } rounded-lg px-3 py-1`}
+                className={`text-white ${formInputIsValid[2] || submitLoading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-primary cursor-pointer"
+                  } rounded-lg px-3 py-1`}
               >
-                 {submitLoading ? "wait..." : "Submit"}
+                {submitLoading ? "wait..." : "Submit"}
               </button>
             </div>
           </div>

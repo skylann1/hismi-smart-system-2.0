@@ -133,6 +133,7 @@ const KelolaAbsensiPage = () => {
         setIsLoading(true);
         const response = await fetch(url, { cache: "no-store" });
         const result = await response.json();
+
         const rawData = result.data as Acara[];
 
         if (!response.ok) throw new Error("Failed to fetch data");
@@ -180,7 +181,7 @@ const KelolaAbsensiPage = () => {
                 Manual
               </Link>
               <Link
-                href={`absen/scanning/tutorial/${acara.typeLabel}/${acara.id}/${acara.statusLabel}`}
+                href={`absen/scanning/tutorial/${acara.id}/${acara.typeLabel}/${acara.statusLabel}`}
                 className="flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700"
               >
                 <QRIcon />
