@@ -152,7 +152,13 @@ export default function Dashboard({ children }: DashboardPropsType) {
               </button>
               <div className="md:flex justify-center items-center hidden">
                 <div className="flex items-center space-x-3">
-                  <SiSmart className="h-8 w-8 text-indigo-600" />
+                  <Image
+                    src="/assets/static-img/logo-himsi.png"
+                    alt="HIMSI Logo"
+                    width={32}
+                    height={32}
+                    className="h-8 w-auto"
+                  />
                   <span className="text-lg font-extrabold text-gray-900">SMART SYSTEMS</span>
                 </div>
               </div>

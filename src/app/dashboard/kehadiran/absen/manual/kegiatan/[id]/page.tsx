@@ -84,6 +84,7 @@ export default function AbsenManualPage() {
   const eventId = params.id as string;
   const [data, setData] = useState<AcaraAttendance | null>(null);
   const [attendanceList, setAttendanceList] = useState<MemberType[]>([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -150,7 +151,11 @@ export default function AbsenManualPage() {
     { key: "status", label: "Status Kehadiran" },
   ];
 
-  const processedData: TableRow[] = attendanceList.map((member) => ({
+  const filteredList = attendanceList.filter((member) =>
+    member.nama.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const processedData: TableRow[] = filteredList.map((member) => ({
     id: `${member.id}-${member.status}`,
     nama: (
       <div className="flex items-center">
@@ -224,6 +229,19 @@ export default function AbsenManualPage() {
 
   return (
     <div className="min-h-screen">
+      <div className="mb-4 flex justify-between bg-white items-center py-4 px-2 rounded-lg">
+        <span className="text-base font-semibold text-gray-900">
+          Filter by name
+        </span>
+
+        <input
+          type="text"
+          placeholder="Cari nama anggota..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-1/3 px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
       <ReusableTable
         title={`Absensi Manual: ${data?.judul || "Loading..."}`}
         description={`Hadir: ${totalHadir} | Izin: ${totalIzin} | Sakit: ${totalSakit} | Absen: ${totalAbsen}`}

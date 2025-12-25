@@ -7,6 +7,7 @@ import type { UserType } from "@/types";
 export default function Page() {
   const [users, setUsers] = useState<UserType[]>([]);
   const [isMounted, setIsMounted] = useState(false);
+  const [search, setSearch] = useState("");
 
   const handleDelete = async (id: string | undefined) => {
     if (!id) return;
@@ -49,6 +50,10 @@ export default function Page() {
     getData();
   }, []);
 
+  const filteredUsers = users.filter((user) =>
+    user.nama.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="shadow-md rounded-md sm:rounded-lg overflow-hidden h-screen bg-white">
       <div className="p-5 text-lg text-gray-900 font-bold flex justify-between items-end bg-white">
@@ -59,11 +64,20 @@ export default function Page() {
             untuk setiap priode nya.
           </p>
         </div>
+        <div className="w-1/3">
+          <input
+            type="text"
+            placeholder="Cari nama anggota..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
       </div>
 
-      <div className="relative overflow-x-auto mt-4 bg-white">
-        <table className="w-full text-sm text-left text-gray-500">
-          <thead className="text-xs text-gray-700 uppercase bg-gray-100">
+      <div className="relative overflow-auto mt-4 bg-white h-125">
+        <table className="w-full text-sm text-left text-gray-500 bg-gray-200">
+          <thead className="sticky top-0 z-10 text-xs text-gray-700 uppercase bg-gray-10">
             <tr>
               <th className="px-6 py-3">Nama</th>
               <th className="px-6 py-3">Email</th>
@@ -77,8 +91,8 @@ export default function Page() {
             </tr>
           </thead>
           <tbody>
-            {users.length > 0
-              ? users.map((user) => (
+            {filteredUsers.length > 0
+              ? filteredUsers.map((user) => (
                 <tr
                   key={user.id}
                   className="bg-white border-b border-gray-200"

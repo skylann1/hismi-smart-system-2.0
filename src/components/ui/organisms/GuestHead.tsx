@@ -69,7 +69,7 @@ export default function GuestHead() {
             </span>
             <span className="w-6">
               <Image
-                src="/assets/static-img/logo.png"
+                src="/assets/static-img/logo-himsi.png"
                 width={500}
                 height={500}
                 alt="logo"
