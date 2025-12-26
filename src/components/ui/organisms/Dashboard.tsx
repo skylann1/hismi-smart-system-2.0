@@ -344,6 +344,7 @@ export default function Dashboard({ children }: DashboardPropsType) {
               ROLES.KETUA_WAKIL,
               ROLES.SETTINGS,
               ROLES.SEKRETARIS,
+              ROLES.KOORDINATOR,
             ]) && (
                 <li>
                   <button
