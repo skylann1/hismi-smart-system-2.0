@@ -82,7 +82,7 @@ export default function withAuth(
         { path: "/dashboard/pertemuan", roles: [ROLES.SEKRETARIS, ROLES.KETUA_WAKIL, ROLES.SETTINGS] },
         { path: "/dashboard/publikasi", roles: [ROLES.PUBLIKASI, ROLES.SETTINGS] },
         { path: "/dashboard/notulensi", roles: [ROLES.SEKRETARIS, ROLES.KETUA_WAKIL, ROLES.SETTINGS] },
-        { path: "/dashboard/keuangan", roles: [ROLES.BENDAHARA, ROLES.KETUA_WAKIL, ROLES.SETTINGS] },
+        // Keuangan removed - open to all members for transparency
         { path: "/dashboard/proker", roles: [ROLES.KOORDINATOR, ROLES.KETUA_WAKIL, ROLES.SETTINGS] },
         { path: "/dashboard/kegiatan", roles: [ROLES.KOORDINATOR, ROLES.KETUA_WAKIL, ROLES.SETTINGS] },
         { path: "/dashboard/settings", roles: [ROLES.SETTINGS] },

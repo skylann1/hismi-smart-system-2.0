@@ -16,6 +16,7 @@ import { useAppDispatch } from "@/hooks/redux";
 import { ROLES, hasAccess } from "@/lib/roles";
 import { FaPersonDotsFromLine } from "react-icons/fa6";
 import { SiSmart } from "react-icons/si";
+import { IoDocumentsSharp } from "react-icons/io5";
 
 type DashboardPropsType = {
   children: React.ReactNode[] | React.ReactElement[];
@@ -275,6 +276,16 @@ export default function Dashboard({ children }: DashboardPropsType) {
                       <span className="ms-3 font-inter-medium">Rekap Absensi</span>
                     </Link>
                   </li>
+
+                  <li>
+                    <Link
+                      href="/dashboard/my-sertifikat"
+                      className="flex items-center p-2 text-gray-900 rounded-lg  hover:bg-gray-100  group"
+                    >
+                      <IoDocumentsSharp className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
+                      <span className="ms-3 font-inter-medium">Sertifikat</span>
+                    </Link>
+                  </li>
                 </>
               )
             }
@@ -345,6 +356,7 @@ export default function Dashboard({ children }: DashboardPropsType) {
               ROLES.SETTINGS,
               ROLES.SEKRETARIS,
               ROLES.KOORDINATOR,
+              ROLES.EDITOR_ABSENSI,
             ]) && (
                 <li>
                   <button
@@ -555,23 +567,19 @@ export default function Dashboard({ children }: DashboardPropsType) {
                 </li>
               )}
 
-            {/* KEUANGAN BENDAHAR*/}
-            {hasAccess(userRoles, [
-              ROLES.BENDAHARA,
-              ROLES.KETUA_WAKIL,
-              ROLES.SETTINGS,
-            ]) && (
-                <li>
-                  <Link
-                    href="/dashboard/keuangan"
-                    className="flex items-center p-2 text-gray-900 rounded-lg  hover:bg-gray-100  group"
-                  >
-                    <GrMoney className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
+            {/* KEUANGAN - All members can view */}
+            {!userRoles.includes(ROLES.GUEST) && (
+              <li>
+                <Link
+                  href="/dashboard/keuangan"
+                  className="flex items-center p-2 text-gray-900 rounded-lg  hover:bg-gray-100  group"
+                >
+                  <GrMoney className="shrink-0 w-5 h-5 text-gray-500 transition duration-75" />
 
-                    <span className="ms-3 font-inter-medium">Keuangan</span>
-                  </Link>
-                </li>
-              )}
+                  <span className="ms-3 font-inter-medium">Keuangan</span>
+                </Link>
+              </li>
+            )}
 
             {/* PROKER UNTUK KOORDINATOR DAN BPH */}
             {hasAccess(userRoles, [
@@ -789,6 +797,27 @@ export default function Dashboard({ children }: DashboardPropsType) {
                   className={`py-2 space-y-2 transition-all duration-200 font-inter-medium ${settingsDrop ? "block" : "hidden"
                     }`}
                 >
+                  {/* Initialize Kas */}
+                  <li>
+                    <Link
+                      href="/dashboard/settings/initialize-kas"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      Initialize Kas
+                    </Link>
+                  </li>
+
+                  {/* Reset Password */}
+                  <li>
+                    <Link
+                      href="/dashboard/settings/reset-password"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-200 rounded-lg pl-11 group hover:bg-gray-100 opacity-80 hover:opacity-100"
+                    >
+                      Reset Password
+                    </Link>
+                  </li>
+
+                  {/* Pemilu Dropdown */}
                   <li>
                     <button
                       type="button"

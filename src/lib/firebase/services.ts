@@ -1,7 +1,7 @@
 import { app } from "./config";
 import { getFirestore, collection, addDoc, getDocs, query, where, getDoc, doc, updateDoc, setDoc, writeBatch, deleteDoc, getCountFromServer, runTransaction } from "firebase/firestore";
 import bcrypt from "bcryptjs";
-import type { UserType, DivisiSettingsType, FormBlog, PertemuanFormData, ProkerFormData, KegiatanFormData, PaslonType, NotulensiFormData } from "@/types";
+import type { UserType, DivisiSettingsType, FormBlog, PertemuanFormData, ProkerFormData, KegiatanFormData, PaslonType, NotulensiFormData, PaymentSubmission, FinancialTransaction } from "@/types";
 
 const firestore = getFirestore(app);
 
@@ -205,10 +205,9 @@ export async function updateUser(
   try {
     const docRef = doc(firestore, collectionName, id);
 
-    if (data.tanggal_lahir) {
-      const defaultPassword = (data.tanggal_lahir as string).replace(/-/g, "");
-      data.password = await bcrypt.hash(defaultPassword || "himsikaliabang", 10);
-    }
+    // NOTE: Password is NOT auto-reset when tanggal_lahir changes
+    // Only admin can reset password via Settings > Reset Password endpoint
+    // This prevents accidental password resets when editing user data
 
     await updateDoc(docRef, data);
 

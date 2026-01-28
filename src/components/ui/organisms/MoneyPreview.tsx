@@ -141,14 +141,67 @@ function TransactionChart({ data }: TransactionChartProps) {
 }
 
 // --- MAIN PAGE COMPONENT ---
-interface MoneyStatisticsProps {
-  transactions?: Transaction[];
-}
 
-export default function MoneyStatistics({
-  transactions = DUMMY_TRANSACTIONS,
-}: MoneyStatisticsProps) {
-  const stats = useMemo(() => {
+export default function MoneyStatistics() {
+  const [transactions, setTransactions] = React.useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  const fetchTransactions = async () => {
+    try {
+      const response = await fetch("/dashboard/api/keuangan/transaksi");
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        // Group transactions by month and calculate income/expense
+        const monthlyData = groupByMonth(result.data);
+        setTransactions(monthlyData);
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      // Fallback to dummy data on error
+      setTransactions(DUMMY_TRANSACTIONS);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const groupByMonth = (data: any[]) => {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const currentYear = new Date().getFullYear();
+    const monthlyMap: Record<string, { income: number; expense: number }> = {};
+
+    // Initialize all months
+    months.forEach((month) => {
+      monthlyMap[month] = { income: 0, expense: 0 };
+    });
+
+    // Aggregate data by month
+    data.forEach((transaction: any) => {
+      const date = new Date(transaction.tanggal);
+      if (date.getFullYear() === currentYear) {
+        const monthKey = months[date.getMonth()];
+        if (transaction.tipe === "pemasukan") {
+          monthlyMap[monthKey].income += transaction.jumlah;
+        } else {
+          monthlyMap[monthKey].expense += transaction.jumlah;
+        }
+      }
+    });
+
+    // Convert to array format
+    return months.map((month) => ({
+      month,
+      income: monthlyMap[month].income,
+      expense: monthlyMap[month].expense,
+    })).filter(m => m.income > 0 || m.expense > 0); // Only show months with data
+  };
+
+  // Calculate stats (must be before early return to maintain hook order)
+  const stats = React.useMemo(() => {
     const totalIncome = transactions.reduce((sum, t) => sum + t.income, 0);
     const totalExpense = transactions.reduce((sum, t) => sum + t.expense, 0);
     const totalNet = totalIncome - totalExpense;
@@ -158,12 +211,21 @@ export default function MoneyStatistics({
     return { totalIncome, totalExpense, totalNet, avgIncome };
   }, [transactions]);
 
-  const chartData = useMemo((): ChartData[] => {
+  const chartData = React.useMemo((): ChartData[] => {
     return transactions.map((t) => ({
       ...t,
       net: t.income - t.expense,
     }));
   }, [transactions]);
+
+  if (isLoading) {
+    return (
+      <div className="bg-gray-50 min-h-screen p-4 sm:p-6 lg:p-8 flex justify-center items-center">
+        <div className="w-10 h-10 border-t-2 border-primary rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="bg-gray-50 min-h-screen p-4 sm:p-6 lg:p-8">

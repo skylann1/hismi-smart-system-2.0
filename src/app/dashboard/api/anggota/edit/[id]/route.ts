@@ -87,12 +87,9 @@ export async function PATCH(
       }
     }
 
-    // kalau tanggal lahir diubah, password ikut update
-    if (updateData.tanggal_lahir) {
-      updateData.password = generatePasswordFromDate(
-        updateData.tanggal_lahir as string
-      );
-    }
+    // NOTE: Password is NOT updated when tanggal_lahir changes
+    // Only admin can reset password via Settings > Reset Password
+    // This prevents accidental password resets when editing user data
 
     const update = await updateUser("users", id, updateData);
 

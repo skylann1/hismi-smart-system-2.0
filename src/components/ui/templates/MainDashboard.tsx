@@ -21,37 +21,67 @@ const MainDashboard = () => {
   const [acara, setAcara] = useState([]);
   const [kegiatan, setKegiatan] = useState([]);
   const [allKegiatan, setAllKegiatan] = useState([]);
+  const [financialSummary, setFinancialSummary] = useState<any>(null);
+  const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
+  const [userPaymentStatus, setUserPaymentStatus] = useState<any>(null);
 
   useEffect(() => {
     const fetchAnggota = async () => {
       try {
-        const [resAnggota, resAcara, resKegiatan, resAllKegiatan] =
+        const [resAnggota, resAcara, resKegiatan, resAllKegiatan, resSummary, resTransactions, resUserPayments] =
           await Promise.all([
             fetch("/dashboard/api/anggota"),
             fetch("/dashboard/api/proker"),
             fetch("/dashboard/api/kegiatan"),
             fetch("/dashboard/api/acara"),
+            fetch("/dashboard/api/keuangan/summary"),
+            fetch("/dashboard/api/keuangan/transaksi"),
+            user.id ? fetch(`/dashboard/api/keuangan/bayar?userId=${user.id}`) : Promise.resolve(null),
           ]);
 
-        const [anggotaJson, acaraJson, kegiatanJson, allKegiatanJson] =
+        const [anggotaJson, acaraJson, kegiatanJson, allKegiatanJson, summaryJson, transactionsJson, userPaymentsJson] =
           await Promise.all([
             resAnggota.json(),
             resAcara.json(),
             resKegiatan.json(),
             resAllKegiatan.json(),
+            resSummary.json(),
+            resTransactions.json(),
+            resUserPayments ? resUserPayments.json() : Promise.resolve(null),
           ]);
 
         setAnggota(anggotaJson.data || []);
         setAcara(acaraJson.data || []);
         setKegiatan(kegiatanJson.data || []);
         setAllKegiatan(allKegiatanJson.data || []);
+
+        if (summaryJson.success) {
+          setFinancialSummary(summaryJson.data);
+        }
+
+        if (transactionsJson.success) {
+          // Get recent 5 transactions
+          const sorted = (transactionsJson.data || []).sort((a: any, b: any) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+          setRecentTransactions(sorted.slice(0, 5));
+        }
+
+        if (userPaymentsJson && userPaymentsJson.success) {
+          const currentMonth = new Date().toLocaleString('id-ID', { month: 'long' });
+          const currentYear = new Date().getFullYear().toString();
+          const thisMonthPayment = (userPaymentsJson.data || []).find(
+            (p: any) => p.bulan === currentMonth && p.tahun === currentYear
+          );
+          setUserPaymentStatus(thisMonthPayment);
+        }
       } catch {
         console.error("Oops something when wrong in the server.");
       }
     };
 
     fetchAnggota();
-  }, []);
+  }, [user.id]);
 
   const latestEvent = allKegiatan.reduce((latest: any, current: any) => {
     if (!latest) return current;
@@ -135,72 +165,104 @@ const MainDashboard = () => {
           <div className="w-full md:w-[40%] rounded-lg h-[26rem] bg-white border border-gray-300 flex flex-col overflow-hidden">
             <div className="w-full bg-primary flex justify-center py-4">
               <span className="text-white font-semibold text-base">
-                Rekapitulasi keuangan
+                Transaksi Keuangan Terbaru
               </span>
             </div>
             <div className="flex flex-col gap-4 h-full p-4 overflow-y-auto">
-              {/* <div className="w-full hover:bg-gray-100 transition-all ease-in-out duration-300 rounded-md flex justify-between items-start p-2">
-                <div className="flex gap-2">
-                  <div className="w-16 h-16 bg-red-700 flex justify-center items-center rounded-md">
-                    <FaCartArrowDown className="text-2xl text-white" />
+              {recentTransactions.length > 0 ? (
+                recentTransactions.map((transaction: any, idx: number) => (
+                  <div
+                    key={idx}
+                    className="w-full hover:bg-gray-100 transition-all ease-in-out duration-300 rounded-md flex justify-between items-start p-2 border-b border-gray-200"
+                  >
+                    <div className="flex gap-2">
+                      <div className={`w-12 h-12 ${transaction.tipe === "pemasukan" ? "bg-green-600" : "bg-red-600"} flex justify-center items-center rounded-md text-white text-xs`}>
+                        {transaction.tipe === "pemasukan" ? "IN" : "OUT"}
+                      </div>
+                      <div className="flex flex-col justify-start gap-1">
+                        <span className="text-sm font-medium">{transaction.judul}</span>
+                        <p className="text-xs font-medium opacity-90">
+                          {transaction.tanggal}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className={`text-xs font-semibold ${transaction.tipe === "pemasukan" ? "text-green-600" : "text-red-600"}`}>
+                        {transaction.tipe === "pemasukan" ? "+" : "-"}Rp {transaction.jumlah.toLocaleString("id-ID")}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-col justify-start gap-1">
-                    <span className="text-sm font-medium">Santunan yatim</span>
-                    <p className="text-xs font-medium opacity-90">
-                      10 mar 2025
-                    </p>
+                ))
+              ) : (
+                <div className="w-full h-full flex flex-col justify-center items-center gap-2">
+                  <div className="text-gray-300 mb-2">
+                    <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
                   </div>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-semibold opacity-80">
-                    Rp 500,000
+                  <span className="text-sm font-medium text-gray-600">
+                    Belum ada transaksi
                   </span>
+                  <p className="text-xs text-gray-500 text-center">
+                    Transaksi akan muncul di sini
+                  </p>
                 </div>
-              </div>
-              <div className="w-full hover:bg-gray-100 transition-all ease-in-out duration-300 rounded-md flex justify-between items-start p-2">
-                <div className="flex gap-2">
-                  <div className="w-16 h-16 bg-green-700 flex justify-center items-center rounded-md">
-                    <FaCartPlus className="text-2xl text-white" />
-                  </div>
-                  <div className="flex flex-col justify-start gap-1">
-                    <span className="text-sm font-medium">Santunan yatim</span>
-                    <p className="text-xs font-medium opacity-90">
-                      20 feb 2025
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-semibold opacity-80">
-                    Rp 250,000
-                  </span>
-                </div>
-              </div> */}
-              <div className="w-full h-full flex justify-center items-center">
-                <span className="text-sm font-medium opacity-80 text-center">
-                  Cooming soon ya man teman, butuh liburan cape ngoding mulu....
-                </span>
-              </div>
+              )}
             </div>
           </div>
 
           <div className="w-full md:w-[60%] rounded-lg h-fit md:h-[26rem] min-h-60 bg-primary border border-gray-300 flex flex-col overflow-hidden justify-center items-center px-4 py-10 text-white gap-8 md:gap-16">
-            {/* <div className="flex flex-col justify-center items-center">
-              <span className="text-4xl font-semibold">8</span>
-              <span className="text-xs opacity-80 font-medium">
-                BULAN TAGIHAN KAS
-              </span>
-            </div>
-            <div className="flex flex-col justify-center items-center">
-              <span className="text-3xl font-semibold">Rp. 80,000</span>
-              <span className="text-xs opacity-80 font-medium">
-                TOTAL YANG HARUS DI BAYAR
-              </span>
-            </div> */}
-            <div className="w-full h-full flex justify-center items-center">
-              <span className="text-sm font-medium opacity-80 text-center">
-                Ini juga sama cooming soon yaaa....
-              </span>
-            </div>
+            {financialSummary ? (
+              // All members view - Financial Summary
+              <>
+                <div className="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-16 w-full">
+                  {user.access?.includes("7") && (
+                    <div className="flex flex-col justify-center items-center">
+                      <span className="text-4xl font-semibold">
+                        {financialSummary.pendingCount || 0}
+                      </span>
+                      <span className="text-xs opacity-80 font-medium">
+                        PEMBAY ARAN MENUNGGU
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex flex-col justify-center items-center">
+                    <span className="text-3xl font-semibold">
+                      Rp {(financialSummary.balance || 0).toLocaleString("id-ID")}
+                    </span>
+                    <span className="text-xs opacity-80 font-medium">
+                      SALDO SAAT INI
+                    </span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-8 text-center">
+                  <div>
+                    <p className="text-2xl font-bold text-green-300">
+                      +Rp {(financialSummary.totalIncome || 0).toLocaleString("id-ID")}
+                    </p>
+                    <p className="text-xs opacity-80 mt-1">Total Pemasukan</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-red-300">
+                      -Rp {(financialSummary.totalExpense || 0).toLocaleString("id-ID")}
+                    </p>
+                    <p className="text-xs opacity-80 mt-1">Total Pengeluaran</p>
+                  </div>
+                </div>
+                <a
+                  href="/dashboard/keuangan"
+                  className="px-6 py-2 bg-white text-primary rounded-md text-sm font-medium hover:bg-gray-100 transition-colors"
+                >
+                  Lihat Detail Keuangan →
+                </a>
+              </>
+            ) : (
+              // Loading state
+              <div className="w-full h-full flex flex-col justify-center items-center gap-4">
+                <div className="w-10 h-10 border-t-2 border-white rounded-full animate-spin"></div>
+                <span className="text-sm opacity-80">Memuat data keuangan...</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -261,38 +323,52 @@ const MainDashboard = () => {
                   <IoCalendarNumberSharp className="text-lg text-sky-500 drop-shadow-2xl" />
                 </div>
                 <span className="font-semibold text-sm opacity-90">
-                  Upcoming <span className="opacity-70 text-xs">•</span>{" "}
-                  {latestEvent?.type || "No Event"}
+                  Kegiatan Mendatang
                 </span>
               </div>
-              <div className="flex flex-col px-4 md:px-3 w-full">
-                <div className=" text-sm opacity-90 border-b border-gray-300 py-4 w-full flex justify-start items-center gap-2">
-                  <IoTimeSharp className="text-xl text-blue-900 " />
-                  <span className="font-medium text-sm opacity-95">
-                    {latestEvent?.tanggal}, {latestEvent?.jamMulai} -{" "}
-                    {latestEvent?.jamSelesai}
-                  </span>
-                </div>
-                <div className="flex flex-col flex-grow gap-2 pt-4 pb-4 justify-center items-start">
-                  <span className="flex gap-1 justify-center items-center p-1 bg-gray-100 rounded-md">
-                    <div className="w-4">
-                      <IoLocation className="text-lg text-red-600" />
-                    </div>
-                    <span className="font-medium text-xs opacity-95">
-                      {latestEvent?.lokasi || "Lokasi belum di tentukan"}
+
+              {latestEvent ? (
+                <div className="flex flex-col px-4 md:px-3 w-full">
+                  <div className=" text-sm opacity-90 border-b border-gray-300 py-4 w-full flex justify-start items-center gap-2">
+                    <IoTimeSharp className="text-xl text-blue-900 " />
+                    <span className="font-medium text-sm opacity-95">
+                      {latestEvent?.tanggal}, {latestEvent?.jamMulai} -{" "}
+                      {latestEvent?.jamSelesai}
                     </span>
-                  </span>
-                  <span className="flex gap-1 justify-center items-center p-1 bg-gray-100 rounded-md">
-                    <div className="w-4">
-                      <div className="ml-1 w-[10px] h-[10px] rounded-full bg-green-400"></div>
-                    </div>
-                    <span className="font-medium text-xs opacity-70">
-                      Pembahasan{" "}
-                      {latestEvent?.judul || "Judul belum di tentukan"}
+                  </div>
+                  <div className="flex flex-col flex-grow gap-2 pt-4 pb-4 justify-center items-start">
+                    <span className="flex gap-1 justify-center items-center p-1 bg-gray-100 rounded-md">
+                      <div className="w-4">
+                        <IoLocation className="text-lg text-red-600" />
+                      </div>
+                      <span className="font-medium text-xs opacity-95">
+                        {latestEvent?.lokasi || "Lokasi belum ditentukan"}
+                      </span>
                     </span>
-                  </span>
+                    <span className="flex gap-1 justify-center items-center p-1 bg-gray-100 rounded-md">
+                      <div className="w-4">
+                        <div className="ml-1 w-[10px] h-[10px] rounded-full bg-green-400"></div>
+                      </div>
+                      <span className="font-medium text-xs opacity-70">
+                        Pembahasan{" "}
+                        {latestEvent?.judul || "Judul belum ditentukan"}
+                      </span>
+                    </span>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="w-full h-full flex flex-col justify-center items-center p-6 text-center">
+                  <div className="text-gray-400 mb-3">
+                    <IoCalendarNumberSharp className="text-5xl mx-auto" />
+                  </div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">
+                    Tidak ada kegiatan yang akan datang
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Pantau terus untuk update jadwal terbaru
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

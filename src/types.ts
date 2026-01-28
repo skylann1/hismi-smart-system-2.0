@@ -128,3 +128,37 @@ export interface NotulensiFormData {
   isi: string;
   author: string;
 }
+
+export interface PaymentSubmission {
+  id?: string;
+  userId: string;
+  nama: string;
+  nim: string;
+  divisi: string;
+  bulan: string; // Format: "Januari", "Februari", etc.
+  tahun: string; // Format: "2025", "2026", etc.
+  jumlah: number; // Default: 10000
+  buktiUrl: string; // URL to uploaded proof image
+  namaPengirim: string; // Username/name who transferred
+  tanggalTransfer: string; // Date of transfer
+  status: "pending" | "approved" | "rejected";
+  keterangan?: string; // Notes from treasurer
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface FinancialTransaction {
+  id?: string;
+  tipe: "pemasukan" | "pengeluaran";
+  judul: string;
+  deskripsi: string;
+  jumlah: number;
+  tanggal: string;
+  kategori: string;
+  buktiUrl?: string; // Optional proof image
+  createdBy: string; // Treasurer user ID
+  createdByName: string; // Treasurer name
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
