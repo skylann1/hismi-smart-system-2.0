@@ -86,7 +86,7 @@ export default function BayarKasPage() {
 
         try {
             // Upload image to Supabase
-            const uploadResult = await uploadImage(buktiImage, "payment-proofs");
+            const uploadResult = await uploadImageViaAPI(buktiImage, "payment-proofs");
 
             if (!uploadResult.success || !uploadResult.url) {
                 alert("Gagal mengupload bukti pembayaran");

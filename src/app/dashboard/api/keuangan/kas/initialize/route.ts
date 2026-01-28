@@ -18,7 +18,12 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        const users = usersResult.datas;
+        const users = usersResult.datas as Array<{ 
+            id: string; 
+            nama?: string; 
+            nim?: string; 
+            divisi?: string; 
+        }>;
 
         // Generate months
         const generateMonths = (start: string, end: string) => {

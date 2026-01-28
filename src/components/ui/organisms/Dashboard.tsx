@@ -15,7 +15,6 @@ import { useSession } from "next-auth/react";
 import { useAppDispatch } from "@/hooks/redux";
 import { ROLES, hasAccess } from "@/lib/roles";
 import { FaPersonDotsFromLine } from "react-icons/fa6";
-import { SiSmart } from "react-icons/si";
 import { IoDocumentsSharp } from "react-icons/io5";
 
 type DashboardPropsType = {
